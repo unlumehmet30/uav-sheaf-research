@@ -28,9 +28,18 @@ def load_lr_map(cfg: dict) -> dict:
     return yaml.safe_load(p.read_text()) if p.exists() else {}
 
 
+def _cpu_model() -> str:
+    import subprocess
+    try:
+        return subprocess.run(["sysctl", "-n", "machdep.cpu.brand_string"], capture_output=True, text=True, timeout=5).stdout.strip() or platform.processor()
+    except Exception:
+        return platform.processor()
+
+
 def environment_info() -> dict:
     import psutil
     return {
+        "cpu_model": _cpu_model(),
         "platform": platform.platform(), "machine": platform.machine(), "processor": platform.processor(),
         "python": sys.version.split()[0], "torch": torch.__version__, "numpy": np.__version__,
         "cpu_count": psutil.cpu_count(logical=True), "ram_gb": round(psutil.virtual_memory().total / 2**30, 1),

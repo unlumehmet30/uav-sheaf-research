@@ -51,24 +51,29 @@ def _style(m):
                 mfc=SURFACE if m in DASHED else COLORS[m], mec=COLORS[m], mew=1.4)
 
 
-def sweep(summ, metric, ylabel, fname, title_iid, title_burst, hline=None, ylim=None):
-    fig, axs = plt.subplots(1, 2, figsize=(9.2, 3.5), sharey=True)
-    for ax, kind, title in zip(axs, ("iid", "burst"), (title_iid, title_burst)):
-        conds = [("iid_0", 0)] + [(f"{kind}_{p}", p) for p in (10, 30, 50)]
-        for m in MAIN:
-            mu = np.array([_s(summ, m, c, metric)[0] for c, _ in conds])
-            ci = np.array([_s(summ, m, c, metric)[1] for c, _ in conds])
-            x = [p for _, p in conds]
-            ax.plot(x, mu, label=LABEL[m], **_style(m), zorder=3 if m == "rascm" else 2)
-            ax.fill_between(x, mu - ci, mu + ci, color=COLORS[m], alpha=0.12, lw=0)
-        if hline is not None:
-            ax.axhline(hline, color=MUTED, lw=1, ls=":")
-        ax.set_xticks([0, 10, 30, 50]); ax.set_xlabel("average packet-loss rate (%)"); ax.set_title(title)
-        if ylim: ax.set_ylim(*ylim)
-    axs[0].set_ylabel(ylabel)
-    h, l = axs[0].get_legend_handles_labels()
+def sweep(summ, metric, ylabel, fname, title_iid, title_burst, hline=None, ylims=((0, 1.02),)):
+    """One row per entry of ``ylims`` (full range first, optional zoomed range second)."""
+    nrow = len(ylims)
+    fig, axs = plt.subplots(nrow, 2, figsize=(9.2, 3.1 * nrow + 0.4), sharey="row", squeeze=False)
+    for r, ylim in enumerate(ylims):
+        for ax, kind, title in zip(axs[r], ("iid", "burst"), (title_iid, title_burst)):
+            conds = [("iid_0", 0)] + [(f"{kind}_{p}", p) for p in (10, 30, 50)]
+            for m in MAIN:
+                mu = np.array([_s(summ, m, c, metric)[0] for c, _ in conds])
+                ci = np.array([_s(summ, m, c, metric)[1] for c, _ in conds])
+                x = [p for _, p in conds]
+                ax.plot(x, mu, label=LABEL[m], **_style(m), zorder=3 if m == "rascm" else 2)
+                ax.fill_between(x, mu - ci, mu + ci, color=COLORS[m], alpha=0.12, lw=0)
+            if hline is not None:
+                ax.axhline(hline, color=MUTED, lw=1, ls=":")
+            ax.set_xticks([0, 10, 30, 50]); ax.set_ylim(*ylim)
+            ax.set_title(title if r == 0 else "zoom on the upper range", fontsize=9 if r else 10)
+            if r == nrow - 1:
+                ax.set_xlabel("average packet-loss rate (%)")
+        axs[r][0].set_ylabel(ylabel)
+    h, l = axs[0][0].get_legend_handles_labels()
     fig.legend(h, l, loc="lower center", ncol=4, fontsize=8, bbox_to_anchor=(0.5, -0.02))
-    fig.tight_layout(rect=(0, 0.1, 1, 1))
+    fig.tight_layout(rect=(0, 0.07 if nrow == 1 else 0.05, 1, 1))
     fig.savefig(FIG / fname, bbox_inches="tight"); plt.close(fig)
 
 
@@ -182,7 +187,7 @@ def latency(fname):
 
 if __name__ == "__main__":
     summ = pd.read_csv(TAB / "summary_long.csv")
-    sweep(summ, "pr_auc", "PR-AUC (average precision)", "fig_pr_auc_vs_loss.png", "iid packet loss (E1/E2)", "Gilbert–Elliott burst loss (E3)", ylim=(0, 1.02))
+    sweep(summ, "pr_auc", "PR-AUC (average precision)", "fig_pr_auc_vs_loss.png", "iid packet loss (E1/E2)", "Gilbert–Elliott burst loss (E3)", ylims=((0.4, 1.01), (0.86, 1.0)))
     sweep(summ, "fpr", "false-positive rate at frozen threshold", "fig_fpr_vs_loss.png", "iid packet loss", "burst packet loss", hline=0.05)
     pr_curves()
     if (TAB / "hypothesis_test.csv").exists():

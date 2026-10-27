@@ -24,6 +24,7 @@ CONVENTIONAL = ["gcn", "gat", "gcn_drop", "nsd"]
 COMPETITORS = ["physics_naive", "physics_aoi", "gcn", "gat", "gcn_drop", "nsd"]
 ABLATIONS = ["rascm_no_rel", "rascm_no_weight", "rascm_no_sheaf", "rascm_no_temporal", "mpnn_e"]
 MIN_EFFECT = 0.02          # smallest PR-AUC difference regarded as practically relevant (pre-registered)
+CSTAR = ["iid_30", "iid_50", "burst_30", "burst_50", "nodeburst_30", "targeted_30"]   # decision set of the pre-specified H1
 KEY_CONDS = ["iid_0", "iid_10", "iid_30", "iid_50", "burst_30", "burst_50", "nodeburst_30",
              "targeted_10", "targeted_30"]
 
@@ -78,7 +79,7 @@ def paired_table(df: pd.DataFrame, a: str, others, conds, metric="pr_auc") -> pd
 def main() -> None:
     TAB.mkdir(parents=True, exist_ok=True)
     df = load()
-    seeds = sorted(df.seed.unique())
+    seeds = sorted(int(x) for x in df.seed.unique())
     summ = summarize(df)
     summ.to_csv(TAB / "summary_long.csv", index=False)
     all_conds = list(df.condition.unique())
@@ -133,10 +134,20 @@ def main() -> None:
         md.append(f"conditions where H1 supported: {int(sub.supports_H1.sum())} / {len(sub)}; "
                   f"conditions where the CI excludes 0 in favour of the baseline (mean diff < 0, CI high < 0): "
                   f"{int(((sub.ci_high < 0)).sum())} / {len(sub)}\n")
+        cs = ht[(ht.reference == "best_conventional") & ht.condition.isin(CSTAR)]
+        phys = ht[(ht.reference == "physics_aoi") & ht.condition.isin(CSTAR)]
+        fpr_r = df[(df.model == "rascm") & (df.condition == "iid_50")].fpr.mean()
+        fpr_b = df[(df.model.isin(CONVENTIONAL)) & (df.condition == "iid_50")].groupby("model").fpr.mean().min()
+        md.append("\n### Pre-specified decision (set C* = " + ", ".join(CSTAR) + ")\n")
+        md.append(f"* H1 supported in {int(cs.supports_H1.sum())} / {len(cs)} conditions vs the best conventional GNN (needs >= 4).\n"
+                  f"* conditions where the CI of the difference vs best conventional GNN contains 0 or is negative: {int((cs.ci_low <= 0).sum())} (falsification if >= 3).\n"
+                  f"* conditions where RA-SCM is not better than the AoI-aware physics baseline (mean diff <= 0): {int((phys.mean_diff <= 0).sum())} / {len(phys)} (falsification if it is at least as good on C*, i.e. a majority).\n"
+                  f"* FPR at iid 50% loss: RA-SCM {fpr_r:.3f} vs lowest conventional GNN {fpr_b:.3f} (needs RA-SCM <= conventional + 0.02).\n")
         ab = paired_table(df, "rascm", [a for a in ABLATIONS if a in set(df.model)], all_conds)
-        ab.to_csv(TAB / "ablation_paired.csv", index=False)
-        md.append("\n## Ablation — paired PR-AUC difference (full RA-SCM − ablation), key conditions\n")
-        md.append("Positive = the removed component helped. \n\n" + ab[ab.condition.isin(KEY_CONDS)].round(4).to_markdown(index=False) + "\n")
+        if not ab.empty:
+            ab.to_csv(TAB / "ablation_paired.csv", index=False)
+            md.append("\n## Ablation — paired PR-AUC difference (full RA-SCM − ablation), key conditions\n")
+            md.append("Positive = the removed component helped. \n\n" + ab[ab.condition.isin(KEY_CONDS)].round(4).to_markdown(index=False) + "\n")
 
     lat = TAB / "latency.csv"
     if lat.exists():

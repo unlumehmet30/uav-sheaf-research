@@ -6,6 +6,8 @@ __pycache__/
 .DS_Store
 results/cache/
 results/checkpoints/*.pt
+!results/checkpoints/*_seed0.pt
 !results/checkpoints/.gitkeep
 report/*.aux
 report/*.log
+.claude/

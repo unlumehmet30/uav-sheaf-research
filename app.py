@@ -95,7 +95,7 @@ else:
     ep, scores = run_episode(json.dumps(cfg_ep.to_dict()), int(seed), model_name)
     thr, thr_note = threshold_for(model_name)
     with tab_swarm:
-        st.plotly_chart(swarm_figure(ep, scores, thr), use_container_width=True)
+        st.plotly_chart(swarm_figure(ep, scores, thr), use_container_width=True, theme=None)
         c1, c2, c3 = st.columns(3)
         c1.metric("anomalous UAVs (ground truth)", int(ep.labels.any(0).sum()))
         c2.metric("in-range packets lost", f"{ep.comm_fail.sum() / max(ep.obs.adj.sum(), 1):.0%}")
@@ -104,8 +104,8 @@ else:
                    "Positions drawn are the *real* ones; the dashed line shows the offset of the reported position.")
     with tab_scores:
         uav = st.selectbox("UAV", list(range(n_uavs)), index=int(np.argmax(ep.labels.any(0))) if ep.labels.any() else 0)
-        st.plotly_chart(score_heatmap(scores, ep.labels, thr), use_container_width=True)
-        st.plotly_chart(score_timeseries(scores, ep.labels, thr, uav), use_container_width=True)
+        st.plotly_chart(score_heatmap(scores, ep.labels, thr), use_container_width=True, theme=None)
+        st.plotly_chart(score_timeseries(scores, ep.labels, thr, uav), use_container_width=True, theme=None)
     with tab_metrics:
         seeds = [int(seed) + 1000 + i for i in range(n_eval)]
         b = build_batch([cfg_ep] * n_eval, seeds)
@@ -116,7 +116,7 @@ else:
             col.metric(lab, "n/a" if np.isnan(m[k]) else f"{m[k]:.3f}")
         st.caption(f"{n_eval} fresh episodes of this scenario (seeds {seeds[0]}…{seeds[-1]}); chance PR-AUC = positive rate = {m['pos_rate']:.3f}.")
         p, r = pr_curve(s, b.labels.numpy(), b.eval_mask.numpy())
-        st.plotly_chart(pr_figure({DISPLAY[model_name]: {"recall": r, "precision": p}}, COLORS, "precision–recall curve (this scenario)"), use_container_width=True)
+        st.plotly_chart(pr_figure({DISPLAY[model_name]: {"recall": r, "precision": p}}, COLORS, "precision–recall curve (this scenario)"), use_container_width=True, theme=None)
 
 with tab_results:
     f = TAB / "summary_long.csv"
@@ -138,8 +138,8 @@ with tab_results:
             if xs:
                 fig.add_trace(go.Scatter(x=xs, y=ys, mode="lines+markers", name=disp, line=dict(color=COLORS[disp], dash="dash" if m_.startswith("physics") else "solid"),
                                          error_y=dict(type="data", array=es, visible=True, thickness=1)))
-        fig.update_layout(height=380, xaxis_title="packet-loss rate (%)", yaxis_title=metric, plot_bgcolor="#fcfcfb", paper_bgcolor="#fcfcfb", margin=dict(l=10, r=10, t=20, b=10), legend=dict(orientation="h", y=-0.25))
-        st.plotly_chart(fig, use_container_width=True)
+        fig.update_layout(height=380, xaxis_title="packet-loss rate (%)", yaxis_title=metric, plot_bgcolor="#fcfcfb", paper_bgcolor="#fcfcfb", font=dict(color="#0b0b0b"), margin=dict(l=10, r=10, t=20, b=10), legend=dict(orientation="h", y=-0.25))
+        st.plotly_chart(fig, use_container_width=True, theme=None)
         wide = sm[sm.metric == metric].pivot(index="model", columns="condition", values="mean")
         st.dataframe(wide.round(3), use_container_width=True)
         for name, title in [("hypothesis_test.csv", "Paired hypothesis tests (RA-SCM − reference)"), ("ablation_paired.csv", "Ablations (full − ablated)"), ("latency.csv", "Inference latency / parameters")]:

@@ -1,0 +1,33 @@
+[seed 1] data ready in 12s: train 200, val 60, 26 test conditions x 40 episodes
+[seed 1] evaluated physics_naive
+[seed 1] evaluated physics_aoi
+[seed 1] training gcn (17425 params, lr 0.03)
+[seed 1]   gcn: val PR-AUC 0.909, 17 epochs, 51s
+[seed 1] evaluated gcn
+[seed 1] training gat (17585 params, lr 0.01)
+[seed 1]   gat: val PR-AUC 0.929, 21 epochs, 118s
+[seed 1] evaluated gat
+[seed 1] training gcn_drop (17425 params, lr 0.03)
+[seed 1]   gcn_drop: val PR-AUC 0.945, 30 epochs, 78s
+[seed 1] evaluated gcn_drop
+[seed 1] training nsd (17729 params, lr 0.01)
+[seed 1]   nsd: val PR-AUC 0.928, 18 epochs, 367s
+[seed 1] evaluated nsd
+[seed 1] training rascm (17571 params, lr 0.01)
+[seed 1]   rascm: val PR-AUC 0.969, 25 epochs, 713s
+[seed 1] evaluated rascm
+[seed 1] training rascm_no_rel (17377 params, lr 0.01)
+[seed 1]   rascm_no_rel: val PR-AUC 0.933, 18 epochs, 465s
+[seed 1] evaluated rascm_no_rel
+[seed 1] training rascm_no_weight (17377 params, lr 0.01)
+[seed 1]   rascm_no_weight: val PR-AUC 0.958, 26 epochs, 593s
+[seed 1] evaluated rascm_no_weight
+[seed 1] training rascm_no_sheaf (16515 params, lr 0.01)
+[seed 1]   rascm_no_sheaf: val PR-AUC 0.969, 30 epochs, 422s
+[seed 1] evaluated rascm_no_sheaf
+[seed 1] training rascm_no_temporal (11043 params, lr 0.01)
+[seed 1]   rascm_no_temporal: val PR-AUC 0.924, 19 epochs, 411s
+[seed 1] evaluated rascm_no_temporal
+[seed 1] training mpnn_e (16321 params, lr 0.01)
+[seed 1]   mpnn_e: val PR-AUC 0.951, 30 epochs, 254s
+[seed 1] evaluated mpnn_e

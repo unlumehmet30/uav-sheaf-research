@@ -16,6 +16,45 @@ including negative results.
 > coverage has limits stated in `literature/search_log.md` (IEEE Xplore / ACM DL were not queried through their own search
 > interfaces).
 
+<!-- RESULTS:START -->
+## Results at a glance (5 seeds, simulation only)
+
+| PR-AUC | iid 0% | iid 30% | iid 50% | burst 30% | burst 50% | rx-burst 30% | targeted 30% |
+|:--|--:|--:|--:|--:|--:|--:|--:|
+| Physics (naive) | 0.894 ±.025 | 0.863 ±.029 | 0.804 ±.033 | 0.605 ±.056 | 0.519 ±.057 | 0.389 ±.047 | 0.779 ±.035 |
+| Physics (AoI-aware) | 0.894 ±.025 | 0.891 ±.024 | 0.888 ±.023 | 0.885 ±.023 | 0.877 ±.022 | 0.885 ±.029 | 0.890 ±.021 |
+| GCN | 0.960 ±.019 | 0.958 ±.018 | 0.951 ±.016 | 0.919 ±.024 | 0.889 ±.023 | 0.929 ±.029 | 0.961 ±.016 |
+| GCN (drop lost) | 0.965 ±.014 | 0.959 ±.016 | 0.949 ±.019 | 0.953 ±.015 | 0.939 ±.023 | 0.907 ±.020 | 0.986 ±.005 |
+| GAT | 0.968 ±.016 | 0.963 ±.020 | 0.956 ±.021 | 0.929 ±.027 | 0.909 ±.021 | 0.943 ±.018 | 0.968 ±.018 |
+| NSD-style sheaf | 0.968 ±.019 | 0.967 ±.016 | 0.959 ±.016 | 0.937 ±.012 | 0.907 ±.014 | 0.948 ±.016 | 0.968 ±.016 |
+| **RA-SCM** | 0.974 ±.019 | 0.975 ±.018 | 0.975 ±.019 | 0.972 ±.020 | 0.967 ±.026 | 0.958 ±.022 | 0.988 ±.007 |
+
+*PR-AUC, mean ± 95% t-interval over seeds; chance = 0.094. Full tables: `results/tables/results_summary.md`.*
+
+* **Pre-specified hypothesis (RA-SCM beats the best capacity-matched conventional GNN under packet loss): not supported.**
+  H1 met in 1 of 6 decision conditions (≥4 required); the interval contains 0 in 4 (≥3 falsifies).
+  The practical margin (≥0.02) is reached only under 50% burst loss (+0.028 [+0.013, +0.043]).
+* RA-SCM beats the age-aware physics baseline in all decision conditions (e.g. 50% bursts: +0.090 [+0.059, +0.121]).
+* A consistency test that ignores staleness collapses under bursty loss (0.519 PR-AUC at 50% bursts vs 0.894 without loss).
+* Ablations: the communication-reliability inputs carry the benefit (+0.088 [+0.051, +0.125] when removed at 50% bursts); learned sheaf maps show no measurable benefit.
+* Not validated on any real data; see Limitations.
+
+| model | parameters | ms per swarm step, N=5 / 10 / 20 | train time per seed [min] |
+|:--|--:|:--|--:|
+| Physics (naive) | 0 | 0.02 / 0.02 / 0.02 | 0.0 |
+| Physics (AoI-aware) | 0 | 0.02 / 0.02 / 0.02 | 0.0 |
+| GCN | 17425 | 0.02 / 0.03 / 0.08 | 1.1 |
+| GCN (drop lost) | 17425 | 0.02 / 0.03 / 0.08 | 0.9 |
+| GAT | 17585 | 0.02 / 0.05 / 0.14 | 1.6 |
+| NSD-style sheaf | 17729 | 0.05 / 0.18 / 0.71 | 5.8 |
+| **RA-SCM** | 17571 | 0.05 / 0.18 / 0.76 | 9.7 |
+| − reliability info | 17377 | 0.05 / 0.17 / 0.72 | 9.6 |
+| − reliability weights | 17377 | 0.05 / 0.17 / 0.71 | 7.8 |
+| − sheaf maps (F = I) | 16515 | 0.04 / 0.13 / 0.52 | 5.9 |
+| − temporal (GRU) | 11043 | 0.04 / 0.17 / 0.75 | 9.0 |
+| − maps − weights (MPNN-E) | 16321 | 0.04 / 0.12 / 0.47 | 4.8 |
+<!-- RESULTS:END -->
+
 ## Status of every component
 
 | Component | Status |
@@ -61,6 +100,8 @@ for s in 0 1 2 3 4; do python -m experiments.run_main --seed $s & done; wait
 python -m experiments.latency
 python -m experiments.aggregate
 python -m experiments.make_figures
+python -m experiments.update_readme        # refreshes the 'Results at a glance' block from results/tables
+python report/build.py                      # report.html / report.pdf (needs Chrome) / report.docx (needs pandoc >= 2.11)
 
 # 5. dashboard
 streamlit run app.py
