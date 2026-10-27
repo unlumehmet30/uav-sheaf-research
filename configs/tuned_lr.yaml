@@ -1,0 +1,11 @@
+# learning rates selected on the tuning seed/validation split (experiments/tune.py)
+gat: 0.01
+gcn: 0.01
+gcn_drop: 0.003
+mpnn_e: 0.01
+nsd: 0.01
+rascm: 0.01
+rascm_no_rel: 0.01
+rascm_no_sheaf: 0.01
+rascm_no_temporal: 0.01
+rascm_no_weight: 0.01
