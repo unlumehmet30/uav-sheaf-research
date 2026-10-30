@@ -23,9 +23,9 @@ This file was written by the AI assistant that built the project; the author mus
 | 11 | Databases, keywords, inclusion/exclusion documented | ✅ | Report §3; `literature/search_log.md` |
 | 12 | Do not fabricate citations | ✅ ⚠️ | All 22 records checked against arXiv API / Crossref / publisher pages (one wrongly recalled DOI was caught and corrected). Details not read in full text are flagged in the matrix |
 | 13 | Researcher's reflection: all five questions | ✅ | Report §11 |
-| 14 | Academic integrity: explain AI assistance per course policy | ⚠️ | AI-assistance paragraph present; **author must insert the course-policy reference** and verify claims |
+| 14 | Academic integrity: explain AI assistance per course policy | ⚠️ | AI-assistance paragraph present (declared under the HW1 brief's academic-integrity section). The EHB 420E-specific policy wording was not available to the assistant; **author should check it and adjust the paragraph if the course requires a particular format** |
 | 15 | Bonus: clear diagram / prototype / visual | ✅ | Figure A1 (architecture), Figures A2–A9, working Streamlit dashboard |
-| – | Placeholders to fill by the author | ⚠️ | name, course/instructor (report header), policy reference |
+| – | Placeholders to fill by the author | ✅ ⚠️ | name, student number, e-mail, university/department and course filled from the author's message (instructor name not given, so not stated); report date set to 30 October 2026 |
 
 ## B. Evaluation criteria (self-assessment, not a grade)
 
