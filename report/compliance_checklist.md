@@ -1,7 +1,7 @@
 # Compliance checklist
 
 Legend: ✅ done and verified · ⚠️ done with a stated limitation · ❌ not done. "Evidence" gives the file or section.
-This file was written by the AI assistant that built the project; the author must re-check each line before submission.
+This file was written by the AI assistant that built the project and updated in the pre-submission check of 6 November 2026; the author must re-check each line before submission.
 
 ## A. HW1 assignment ("From Curiosity to Scientific Discovery")
 
@@ -9,23 +9,23 @@ This file was written by the AI assistant that built the project; the author mus
 |---|---|---|---|
 | 1 | Choose ONE AI research problem | ✅ | UAV position anomaly vs communication failure (Report §1–2) |
 | 2 | Problem discovery: precise problem, how discovered, why interested, who is affected, evidence, why unsolved, root cause vs symptom | ✅ ⚠️ | Report §1–2. Evidence of existence = literature statements + our *simulation* result; no field data |
-| 3 | Intensive literature review: ≥10 publications critically compared | ✅ | 20 matrix entries + 2 channel-model papers (Report §3, `literature/literature_matrix.md`, Table 1) |
+| 3 | Intensive literature review: ≥10 publications critically compared | ✅ | 43 verified references; 17 closest works compared one per row in Table 1 (Report §3); per-paper matrix in the supplementary PDF |
 | 3a | Which methods succeed/fail, conditions, why | ✅ | Report §3 "Comparative analysis"; matrix columns |
 | 3b | Assumptions, biases, dataset limits, contradictions | ✅ | Report §3; `literature/gap_analysis.md` §2 |
-| 3c | Reproducibility; could the gap reflect an incomplete search? | ✅ ⚠️ | Search protocol and its limits in §3 and `literature/search_log.md`. **IEEE Xplore / ACM DL not queried natively; most items abstract-level** |
-| 4 | Research gap: one precise gap, supporting publications, why it matters | ✅ | Report §4 |
+| 3c | Reproducibility; could the gap reflect an incomplete search? | ✅ ⚠️ | Round 2 (6 Nov 2026) searched IEEE/ACM records through Crossref, OpenAlex and Semantic Scholar; **IEEE Xplore / ACM DL native interfaces still not queried**; 19 of 43 works read in full text, the rest at abstract level |
+| 4 | Research gap: one precise gap, supporting publications, why it matters | ✅ | Report §4, narrowed in round 2 (joint handling of loss and faults exists in cooperative localisation; learned detectors simulated under loss exist) |
 | 5 | Novel solution: approach, reasoning, new vs combination vs application, simpler alternatives, weakest assumption | ✅ | Report §5 (originality ledger in `literature/gap_analysis.md` §5); weakest assumption: Gaussian sensor model / authors' simulator (§7, Reflection 5) |
 | 6 | Feasibility: data, equipment, software, expertise, time, funding; design, baselines, metrics; ethics; what is beyond capability | ✅ | Report §6–7 |
 | 7 | Validation: falsifiable hypothesis, success criteria, what disproves, bias/overfitting/alternatives/reproducibility, negative results | ✅ | Report §8; executed in §9 |
 | 8 | Impact: who benefits, harms, new questions | ✅ | Report §9 "Expected scientific impact" |
-| 9 | Required sections: title, abstract (200–250 words), introduction, problem statement, critical review, gap, solution, methodology, feasibility/limitations, expected results/impact, references | ✅ | Report; abstract = 242 words (counted by script) |
-| 10 | Length 5–8 pages excluding references and optional visuals | ⚠️ | ≈7.8 pages main text on A4, 10 pt, 17 mm margins (references ≈0.8 page, appendix figures 3 pages; total PDF 12 pages). **If the course requires 11–12 pt, ≈1–1.5 pages must be cut** (candidates: Table 1, Table 5, Section 9 "Other experiments") |
+| 9 | Required sections: title, abstract (200–250 words), introduction, problem statement, critical review, gap, solution, methodology, feasibility/limitations, expected results/impact, references | ✅ | Report; abstract = 248 words (counted by script) |
+| 10 | Length 5–8 pages excluding references and optional visuals | ✅ | Sections 1–9 ≈ 7.2 pages, with the reflection ≈ 7.9 pages (A4, 10 pt); Appendix A (figures) and B (supplementary tables) marked optional |
 | 11 | Databases, keywords, inclusion/exclusion documented | ✅ | Report §3; `literature/search_log.md` |
-| 12 | Do not fabricate citations | ✅ ⚠️ | All 22 records checked against arXiv API / Crossref / publisher pages (one wrongly recalled DOI was caught and corrected). Details not read in full text are flagged in the matrix |
+| 12 | Do not fabricate citations | ✅ ⚠️ | All 43 records checked against Crossref / arXiv / publisher pages on 6 Nov 2026; claims checked against abstracts or full texts; evidence level per paper in the matrix |
 | 13 | Researcher's reflection: all five questions | ✅ | Report §11 |
-| 14 | Academic integrity: explain AI assistance per course policy | ⚠️ | AI-assistance paragraph present (declared under the HW1 brief's academic-integrity section). The EHB 420E-specific policy wording was not available to the assistant; **author should check it and adjust the paragraph if the course requires a particular format** |
+| 14 | Academic integrity: explain AI assistance per course policy | ⚠️ | Declaration rewritten in past tense (models, dates, what the AI did). **Author must confirm the sentence on own contribution and check the course-specific policy wording** |
 | 15 | Bonus: clear diagram / prototype / visual | ✅ | Figure A1 (architecture), Figures A2–A9, working Streamlit dashboard |
-| – | Placeholders to fill by the author | ✅ ⚠️ | name, student number, e-mail, university/department and course filled from the author's message (instructor name not given, so not stated); report date set to 30 October 2026 |
+| – | Placeholders to fill by the author | ✅ ⚠️ | report date set to 6 November 2026; GitHub URL added to the title block — **the repository is private: make it public or share it with the instructor, or remove the URL** |
 
 ## B. Evaluation criteria (self-assessment, not a grade)
 

@@ -14,7 +14,7 @@ including negative results.
 
 > **Scope warning.** Everything here is *simulation*. No claim is made about real UAV performance. Literature
 > coverage has limits stated in `literature/search_log.md` (IEEE Xplore / ACM DL were not queried through their own search
-> interfaces).
+> interfaces; IEEE/ACM records were searched through Crossref, OpenAlex and Semantic Scholar).
 
 <!-- RESULTS:START -->
 ## Results at a glance (5 seeds, simulation only)
@@ -102,6 +102,7 @@ python -m experiments.aggregate
 python -m experiments.make_figures
 python -m experiments.update_readme        # refreshes the 'Results at a glance' block from results/tables
 python report/build.py                      # report.html / report.pdf (needs Chrome) / report.docx (needs pandoc >= 2.11)
+python report/build_supplement.py           # supplementary.pdf: search log, literature matrix, gap analysis
 
 # 5. dashboard
 streamlit run app.py

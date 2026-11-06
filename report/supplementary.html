@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Supplementary Material: Literature Search, Matrix and Gap Analysis</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="report.css" />
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Supplementary Material: Literature Search, Matrix and Gap Analysis</h1>
+</header>
+<p class="author">
+Mehmet Ünlü (040230253) · EHB 420E Artificial Neural Networks · HW1 – From Curiosity to Scientific Discovery · supplement to the report “Reliability-Aware Sheaf Consistency for Distinguishing UAV Position Anomalies from Communication Failures”
+</p>
+<p>Contents: S1 search protocol and log · S2 comparative literature matrix · S3 critical synthesis, gap verification and originality ledger.</p>
+<h2 id="s1.-literature-search-protocol-and-log">S1. Literature search protocol and log</h2>
+<p><strong>Search periods:</strong> round 1 on 27 October 2026; round 2 (pre-submission check) on 6 November 2026. <strong>Searcher:</strong> the project author with AI assistance (round 1: Claude Sonnet 5.5; round 2: Claude Opus 5.5; see the AI-assistance declaration in the report).</p>
+<h3 id="what-was-actually-searched-and-what-was-not">What was actually searched (and what was not)</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Channel</th>
+<th>How it was used</th>
+<th>Limitation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>General web search tool (US-only index)</td>
+<td>22 keyword queries, listed below</td>
+<td>not a bibliographic database; ranking is opaque; no date/venue filters</td>
+</tr>
+<tr class="even">
+<td>arXiv API (<code>export.arxiv.org/api/query?id_list=...</code>)</td>
+<td>metadata (authors, dates, comment/venue field) of every arXiv-hosted item</td>
+<td>metadata only</td>
+</tr>
+<tr class="odd">
+<td>Crossref REST API</td>
+<td>DOI, venue, volume, pages for every item that has a DOI; in round 2 also keyword search restricted to IEEE (member 263) and ACM (member 320) records</td>
+<td>some items have no DOI (ICLR, PMLR); IEEE records carry no abstracts</td>
+</tr>
+<tr class="even">
+<td>OpenAlex API (round 2)</td>
+<td>14 title/abstract and full-text keyword queries from 2018 on; abstracts of IEEE/ACM records</td>
+<td>relevance ranking; indexing of 2026 proceedings may lag</td>
+</tr>
+<tr class="odd">
+<td>Semantic Scholar API (round 2)</td>
+<td>5 boolean bulk queries from 2018 on</td>
+<td>relevance endpoint rate-limited (HTTP 429)</td>
+</tr>
+<tr class="even">
+<td>Publisher / proceedings pages (NeurIPS proceedings, PMLR, AAAI OJS, Springer, MDPI/PMC)</td>
+<td>confirm venue and bibliographic data</td>
+<td>–</td>
+</tr>
+<tr class="odd">
+<td>Full-text reading</td>
+<td>Round 1 (AI-assisted): Dang et al. 2023, Bi et al. 2024, Mykytyn et al. 2023 (key sections); Joslyn et al. 2020 and Hanks et al. 2025 (partly). Round 2 (AI-assisted): Hansen &amp; Gebhart 2020, Bodnar et al. 2022, Barbero et al. 2022, Hansen &amp; Ghrist 2019, Hernández &amp; Sánchez-Soto 2026, Kipf &amp; Welling 2017, Veličković et al. 2018, Deng &amp; Hooi 2021, Tolstaya et al. 2020, Kargar Tasooji &amp; Parasuraman 2025, Vijay et al. 2025, Park &amp; Yoo 2026, Tariq et al. 2026, Tariq &amp; Shaukat 2026</td>
+<td>all other entries: <strong>abstract-level reading only</strong> (evidence level per entry in the matrix)</td>
+</tr>
+<tr class="even">
+<td>IEEE Xplore, ACM DL, Scopus, Web of Science native search</td>
+<td><strong>not queried through their own search interfaces</strong> (no access in this environment). In round 2 IEEE/ACM records were searched through Crossref (member filter), OpenAlex and Semantic Scholar</td>
+<td>remaining threat to the gap claim: native-interface searches (e.g. through the ITU library) could still find items these indexes rank low</td>
+</tr>
+</tbody>
+</table>
+<h3 id="keywords-combined-with-andor-as-shown-in-the-query-list">Keywords (combined with AND/OR as shown in the query list)</h3>
+<ul>
+<li>Sheaf learning: <em>sheaf neural network</em>, <em>neural sheaf diffusion</em>, <em>cellular sheaf</em>, <em>sheaf Laplacian</em>, <em>restriction map</em>, <em>connection Laplacian</em>, <em>nonlinear sheaf diffusion</em>, <em>temporal / dynamic sheaf</em></li>
+<li>Graph anomaly detection: <em>graph neural network anomaly detection multivariate time series</em>, <em>sensor fault detection GNN</em>, <em>missing data / unreliable edges</em></li>
+<li>UAV reliability: <em>GPS spoofing detection UAV swarm</em>, <em>cooperative localization spoofing / fault</em>, <em>position spoofing swarm formation</em>, <em>packet loss multi-robot GNN</em></li>
+<li>Communication models: <em>Gilbert–Elliott burst loss</em></li>
+<li>Robust/uncertainty-aware GNNs: <em>robust GCN variance attention</em>, <em>edge reliability weighting</em></li>
+</ul>
+<h3 id="query-log-all-executed-2026-10-27">Query log (all executed 2026-10-27)</h3>
+<ol type="1">
+<li>Neural Sheaf Diffusion: A Topological Perspective on Heterophily and Oversmoothing in GNNs</li>
+<li>Sheaf Neural Networks Hansen Gebhart arXiv 2012.06333</li>
+<li>Sheaf Neural Networks with Connection Laplacians Barbero</li>
+<li>sheaf neural network anomaly detection multi-agent sensor fusion consistency</li>
+<li>Nonlinear Sheaf Diffusion in Graph Neural Networks OR “Sheaf diffusion goes nonlinear” adaptive sheaf Laplacians</li>
+<li>Graph neural network GPS spoofing detection UAV swarm cooperative localization</li>
+<li>Graph Neural Network-Based Anomaly Detection in Multivariate Time Series Deng Hooi AAAI 2021</li>
+<li>graph neural networks multi-robot communication packet loss robustness decentralized controllers</li>
+<li>sheaf neural network dynamic graph temporal sheaf spatiotemporal time-varying restriction maps</li>
+<li>sheaf-theoretic multi-agent distributed coordination consensus sheaf Laplacian robots Hanks</li>
+<li>GNN sensor fault detection missing data unreliable edges edge reliability weighting graph anomaly detection robust to missing observations</li>
+<li>UAV swarm GPS spoofing detection relative distance consistency swarm formation deep learning</li>
+<li>Gilbert-Elliott burst packet loss model Elliott 1963 estimates of error rates for codes on burst-noise channels</li>
+<li>Semi-Supervised Classification with Graph Convolutional Networks Kipf Welling / Graph Attention Networks</li>
+<li>Toward a spectral theory of cellular sheaves Hansen Ghrist</li>
+<li>Sheaf Hypergraph Networks OR Sheaf Attention Networks OR Cooperative Sheaf Neural Networks OR sheaf neural networks missing data time series</li>
+<li>“sheaf” “anomaly detection” graph neural network sensor network OR swarm OR UAV <em>(gap check)</em></li>
+<li>sheaf Laplacian cooperative localization multi-robot relative measurements restriction maps spoofing OR fault <em>(gap check)</em></li>
+<li>Filling the G_ap_s: Multivariate Time Series Imputation by Graph Neural Networks</li>
+<li>Robust Graph Convolutional Networks Against Adversarial Attacks Zhu KDD 2019</li>
+<li>“cellular sheaf” OR “sheaf cohomology” false data injection attack detection networked systems consensus <em>(gap check)</em></li>
+<li>sheaf Laplacian weighted by uncertainty OR reliability OR covariance “packet loss” OR “communication failure” OR “missing edges” <em>(gap check)</em></li>
+</ol>
+<h3 id="inclusion-criteria">Inclusion criteria</h3>
+<ol type="1">
+<li>Directly about at least one of: sheaf-based learning/diffusion/sensor integration; GNN-based anomaly or spoofing detection; UAV/multi-robot swarm position consistency, spoofing or cooperative localisation; GNN behaviour under missing/unreliable data or communication; burst-loss channel models used in the simulator.</li>
+<li>Bibliographic data verifiable in an independent record (arXiv API, Crossref, publisher page).</li>
+<li>Peer-reviewed, <strong>or</strong> a clearly labelled preprint/workshop paper that is the only/primary source for a specific idea. Status is recorded in the matrix and the bibliography.</li>
+<li>English language, 1960–2026 (foundational channel models and GCN/GAT are older; sheaf learning is 2019+).</li>
+</ol>
+<h3 id="exclusion-criteria">Exclusion criteria</h3>
+<ul>
+<li>Patents, blog/skill/playbook pages, and aggregator summaries as sources of claims (they appeared in the search results and were used only to find primary sources).</li>
+<li>Items for which bibliographic data could not be confirmed.</li>
+<li>UAV-swarm work on intrusion detection by federated learning, single-UAV spoofing detectors using radio fingerprints/cellular signals, and GNSS signal-authentication schemes — relevant context but not about swarm-level geometric consistency under unreliable communication.</li>
+<li>Results that appeared only as aggregator summaries with numbers not found on the primary page (e.g. benchmark F1 values on third-party leaderboards).</li>
+<li>Items from low-visibility or unrefereed venues when a peer-reviewed source covers the same idea (round 2).</li>
+</ul>
+<h3 id="items-found-but-not-included-in-the-matrix-context-only">Items found but not included in the matrix (context only)</h3>
+<ul>
+<li><em>Sheaf Graph Neural Networks via PAC-Bayes Spectral Optimization</em> (arXiv:2508.00357; arXiv comment: AAAI 2026, acceptance not verified): node-level certified confidence intervals, <strong>not</strong> edge reliability; only the abstract page was read.</li>
+<li><em>From Classical to Topological Neural Networks Under Uncertainty</em> (arXiv:2602.10266): book chapter; no sheaf/anomaly/communication content in the abstract.</li>
+<li><em>Sheaf-Theoretic Planning</em> (arXiv:2605.01879): categorical planning report, no learning/anomaly detection in the abstract.</li>
+<li>Resilient collaborative localisation under spoofed radio measurements, fault-tolerant cooperative localisation by covariance union, and the Chinese J. Aeronautics 2022 paper on GNSS faults in swarms were seen as snippets in round 1. <strong>Resolved in round 2:</strong> the last is Chen et al. 2022 (now in the matrix and the report); the first is Karstensen &amp; Galeazzi, arXiv:2511.21432 (ideal links, one scenario; screened, not cited); the covariance-union line is Uhlmann 2003 (Information Fusion 4(3), metadata only) and Wang et al. 2021 (IEEE RA-L 6(4), abstract only), screened but not cited.</li>
+</ul>
+<h3 id="round-2-query-log-6-november-2026">Round 2 query log (6 November 2026)</h3>
+<p>All run 2026-11-06. OpenAlex ‘ta’ = filter title_and_abstract.search; ‘fulltext’ = search parameter. Crossref = query.bibliographic, relevance-ranked, so its totals count any-term matches. Semantic Scholar = /paper/search/bulk (boolean; the relevance endpoint returned HTTP 429). Hits = total reported by the index; screened = titles read, with abstracts read for every title that looked relevant.</p>
+<ul>
+<li>Q1 OpenAlex fulltext: ‘UAV swarm GPS spoofing detection graph neural network packet loss’ | from_publication_date:2018-01-01 | hits 237 | titles screened 50 (top 50 by relevance), abstracts read 5</li>
+<li>Q2 OpenAlex ta: (UAV OR drone OR multi-UAV) AND swarm AND (spoofing OR “position anomaly” OR “false data injection”) AND (“graph neural network” OR GNN OR “graph attention” OR “graph convolutional”) | from 2018-01-01 | hits 9 | screened 9, abstracts 6</li>
+<li>Q3 OpenAlex ta: (“cooperative localization” OR “collaborative localization” OR “cooperative positioning”) AND (spoofing OR fault OR anomaly OR “false data injection” OR outlier) AND (“packet loss” OR “communication failure” OR “communication delay” OR “intermittent communication” OR “age of information” OR “unreliable communication” OR “communication loss”) | from 2018-01-01 | hits 7 | screened 7, abstracts 3</li>
+<li>Q4 OpenAlex ta: (UAV OR drone OR multi-UAV OR “multi-robot” OR swarm) AND (spoofing OR “position anomaly” OR “fault detection” OR “anomaly detection” OR “false data injection”) AND (“packet loss” OR “packet dropout” OR “communication failure” OR “intermittent communication” OR “age of information” OR “unreliable communication” OR “communication delay”) AND (“graph neural network” OR GNN OR “deep learning” OR “neural network” OR learning) | from 2018-01-01 | hits 9 | screened 9, abstracts 5</li>
+<li>Q5 OpenAlex ta: (UAV OR drone OR multi-UAV OR “multi-robot” OR swarm OR “multi-agent”) AND (GPS OR GNSS) AND (spoofing OR anomaly OR fault) AND (“inter-UAV” OR “relative distance” OR “relative position” OR ranging OR UWB OR “relative measurement” OR “range measurement”) | from 2018-01-01 | hits 232 | titles screened 50 (top 50), abstracts 14</li>
+<li>Q6 OpenAlex ta: sheaf AND (UAV OR drone OR swarm OR “multi-robot” OR “multi-agent” OR localization OR “sensor network”) AND (anomaly OR fault OR spoofing OR consistency OR attack OR outlier) | from 2018-01-01 | hits 43 | screened 43, abstracts 4</li>
+<li>Q7 OpenAlex ta: (“graph neural network” OR GNN OR “graph attention” OR “message passing”) AND (“multi-robot” OR “multi-UAV” OR swarm OR “multi-agent”) AND (“packet loss” OR “packet drop” OR “communication delay” OR “communication failure” OR “age of information” OR “intermittent communication” OR “lossy communication”) | from 2018-01-01 | hits 46 | screened 46, abstracts 2 (most hits are AoI/routing MARL, not detection)</li>
+<li>Q8 OpenAlex ta: (“age of information” OR “stale information” OR “outdated information” OR “delayed measurements”) AND (spoofing OR “anomaly detection” OR “fault detection” OR “misbehavior detection” OR “false data”) AND (UAV OR drone OR swarm OR “multi-robot” OR vehicle OR platoon OR V2X) | from 2018-01-01 | hits 4 | screened 4, abstracts 2</li>
+<li>Q9 OpenAlex ta: (“graph neural network” OR GNN OR “graph attention” OR “graph convolutional”) AND (“misbehavior detection” OR “position falsification” OR “position spoofing” OR “GPS spoofing” OR “GNSS spoofing” OR “location spoofing”) | from 2018-01-01 | hits 21 | screened 21, abstracts 5</li>
+<li>Q10 OpenAlex ta: (swarm OR multi-UAV OR “UAV formation” OR “drone fleet” OR “multi-robot”) AND (spoofing OR “false data injection” OR “position anomaly” OR “position falsification”) AND (“packet loss” OR “packet dropout” OR “communication loss” OR “link failure” OR “link loss” OR “message loss” OR “communication failure” OR “missing measurements”) | from 2018-01-01 | hits 14 | screened 14, abstracts 4</li>
+<li>Q11 OpenAlex ta: (“graph neural network” OR GNN OR “graph attention” OR “message passing neural” OR “graph convolutional” OR “sheaf neural”) AND (“cooperative localization” OR “collaborative localization” OR “cooperative positioning” OR “relative localization” OR “network localization”) AND (fault OR outlier OR anomaly OR spoofing OR attack OR malicious OR Byzantine) | from 2018-01-01 | hits 2 | screened 2, abstracts 2</li>
+<li>Q12 OpenAlex ta: (swarm OR multi-UAV OR “multi-robot” OR “UAV formation” OR “UAV network”) AND spoofing AND (jamming OR “packet loss” OR “communication failure” OR “link failure”) AND (distinguish OR discriminate OR differentiate OR “root cause” OR classify OR classification OR diagnosis OR isolate) | from 2018-01-01 | hits 23 | screened 23, abstracts 2</li>
+<li>Q13 OpenAlex ta: (“spatio-temporal graph” OR “graph neural network” OR GNN OR “graph attention” OR “graph convolutional”) AND (UAV OR drone OR swarm OR “multi-robot” OR “multi-agent”) AND (“anomaly detection” OR “fault detection” OR “fault diagnosis” OR “attack detection”) AND (“packet loss” OR delay OR latency OR missing OR “communication constraints” OR “communication failure” OR “link quality”) | from 2018-01-01 | hits 39 | screened 39 (mostly single-UAV sensor fault diagnosis or IoT), abstracts 0 beyond titles already seen</li>
+<li>Q14 OpenAlex fulltext: ‘GNSS spoofing detection UAV swarm age of information packet loss relative distance consistency’ | from 2018-01-01 | hits 41 | screened 41, abstracts 1</li>
+<li>C1 Crossref, member 263 (IEEE): ‘UAV swarm GPS spoofing detection graph neural network packet loss’ | from-pub-date:2018 | hits 88,323 (any-term relevance) | screened top 50; abstracts for 6 candidates fetched from OpenAlex by DOI (Crossref IEEE records carry no abstracts)</li>
+<li>C2 Crossref, member 263 (IEEE): ‘multi-robot cooperative localization fault detection learning packet loss communication failure’ | from-pub-date:2018 | hits 151,621 | screened top 50; abstracts for 8 fetched from OpenAlex</li>
+<li>C3 Crossref, member 263 (IEEE): ‘drone swarm position anomaly detection graph neural network intermittent communication delay’ | from-pub-date:2018 | hits 125,402 | screened top 50 (dominated by generic network-traffic GNN anomaly detection); 1 abstract fetched</li>
+<li>C4 Crossref, member 320 (ACM): ‘UAV drone swarm GPS spoofing position anomaly detection graph neural network’ | from-pub-date:2018 | hits 8,401 | screened top 50; abstracts for 4 fetched from OpenAlex</li>
+<li>C5 Crossref, member 320 (ACM): ‘multi-robot swarm fault detection learning unreliable communication packet loss localization’ | from-pub-date:2018 | hits 8,369 | screened top 50; no relevant hit</li>
+<li>S1 Semantic Scholar bulk: (UAV | drone | swarm | “multi-robot” | “multi-agent”) + (spoofing | “false data injection” | “position anomaly” | “fault detection”) + (“graph neural network” | GNN | “graph attention” | “graph convolutional” | sheaf) + (“packet loss” | “communication failure” | “communication delay” | “age of information” | “intermittent communication” | “unreliable communication” | “communication constraints” | “missing data”) | year 2018- | hits 1 | screened 1 (ZT-GAT)</li>
+<li>S2 Semantic Scholar bulk: (UAV | drone | swarm | “multi-robot” | “multi-UAV” | “cooperative localization”) + (spoofing | “position anomaly” | “fault detection” | “false data injection” | “anomaly detection”) + (“packet loss” | “communication failure” | “age of information” | “intermittent communication” | “unreliable communication” | “communication loss” | “packet dropout”) | year 2018- | hits 20 | screened 20, abstracts 1</li>
+<li>S3 Semantic Scholar bulk: (UAV | drone | swarm | “multi-robot” | “multi-UAV”) + (GPS | GNSS) + spoofing + (“graph neural network” | GNN | “graph attention” | “graph convolutional” | “deep learning” | learning) | year 2018- | hits 157 | titles screened 120 of 157, abstracts 6</li>
+<li>S4 Semantic Scholar bulk: (“cooperative localization” | “collaborative localization” | “relative localization” | “cooperative navigation” | “integrity monitoring”) + (swarm | “multi-robot” | “multi-UAV” | “multi-agent”) + (spoofing | fault | outlier | anomaly | “false data injection”) + (“packet loss” | “communication failure” | “communication delay” | “age of information” | intermittent | “unreliable communication” | “limited connectivity” | asynchronous) | year 2018- | hits 5 | screened 5, abstracts 2</li>
+<li>S5 Semantic Scholar bulk: sheaf + (UAV | drone | swarm | robot | “multi-robot” | localization | “sensor network” | “multi-agent”) + (anomaly | fault | spoofing | consistency | outlier | attack | “packet loss”) | year 2018- | hits 11 | screened 11 (no new item beyond Q6)</li>
+<li>Verification: Crossref <code>/works/&lt;DOI&gt;</code> for all DOI-bearing candidates (and, in the final check, all 31 DOI-bearing references of the report); arXiv API <code>id_list</code> query for 2608.06885, 2507.06750 and 2605.13500; DataCite /dois/10.5281/zenodo.20768967. Full-text sections were read for arXiv:2605.13500 (SpliTech 2026) and arXiv:2507.06750 (IROS 2025). The Springer full text of ZT-GAT was not retrievable.</li>
+</ul>
+<p>Additional round-2 queries on classical cooperative localisation (OpenAlex, Crossref and arXiv API; resilient collaborative localisation under spoofing, detectability of GNSS faults in swarms, fault detection and exclusion in multi-robot localisation, cooperative localisation with packet loss or delay, AoI combined with fault/anomaly detection) and reference chasing in arXiv:2507.06750 and arXiv:2511.21432.</p>
+<h3 id="round-2-screening-decisions">Round 2: screening decisions</h3>
+<p><strong>Added to the report and the matrix:</strong> Chen et al. 2022; He et al. 2024; Kargar Tasooji &amp; Parasuraman 2025; Cao et al. 2026; Ou et al. 2023; Vijay et al. 2025; Michieletto et al. 2023; Park &amp; Yoo 2026 (preprint); Sophia et al. 2026; Pan et al. 2026; Tariq et al. 2026 (Sci. Rep.); Tariq &amp; Shaukat 2026 (Front. Commun. Netw.); Moustafa &amp; Abdelghany 2026; and the foundational sources Kaul et al. 2012, Sinopoli et al. 2004, Julier &amp; Uhlmann 1997, Willsky 1976, Brown 1992, Kerns et al. 2014, Tippenhauer et al. 2011, Hayat et al. 2016.</p>
+<p><strong>Screened, not cited</strong> (reason in brackets): Mitra et al. 2019, Autonomous Robots (resilient estimation of an external process); Chang et al. 2022, IEEE T-RO (CI-based localisation under missing links/observations, no erroneous data); Wang et al. 2021, IEEE RA-L (covariance-union fault tolerance, no loss model); Kargar Tasooji &amp; Marquez 2022, IEEE Access (DoS + false-data-injection resilient estimation); Qu et al. 2017, IEEE Access (UAV fault-tolerant cooperative positioning, no loss model); Causa &amp; Fasano 2023, PLANS and Gipson &amp; Leishman 2022, IEEE TAES (fault detection and exclusion, no loss model); Olawoye &amp; Gross 2026, Applied Sciences (distributed fault isolation for ranging-based localisation); Liu et al. 2026, IEEE TIM (parity-vector GNSS fault detection with relative ranging); Mughal et al. 2026, IEEE IoT-J (network intrusion detection); You et al. 2026, Drones (delay/loss diagnosis on the communication side only); Alamleh &amp; Pulatov 2026, SpliTech (non-learned link-quality and staleness weighting of range constraints); Voitovych &amp; Bychkov 2026 (conference proceedings, hand-designed guard statistics); Almekhyal et al. 2026 (single-UAV learned detectors with injected packet loss); Abima et al. 2026, ACM (relay-risk score, paired Monte Carlo); Fan et al. 2023, MILCOM and Gu et al. 2025, ICPADS (swarm spoofing detection/defence without loss model); Poornima 2026 and Cui 2026 (low-visibility venues); preprints and software (Coulibaly et al. 2026, TRUST-V; Tariq et al. PINN-CMA software; Karstensen &amp; Galeazzi 2025); Moreau 2026 and Pasupuleti 2025 (weak venues, not detection of position anomalies). Only abstracts were read for most of these.</p>
+<p><strong>Effect on the gap:</strong> the gap was narrowed (report Section 4). Joint handling of link failures and faulty measurements exists in model-based cooperative localisation, and learned graph swarm detectors have been run under simulated loss; what remains unaddressed in the sources read is loss/AoI as a <em>controlled, stratified</em> confounder of position-consistency detection, compared against a standalone age-aware physics baseline.</p>
+<p><strong>Note:</strong> one OpenAlex response contained text addressed to automated agents (a request to register an API key with the user’s e-mail); it was ignored.</p>
+<div class="pagebreak">
+
+</div>
+<h2 id="s2.-comparative-literature-matrix">S2. Comparative literature matrix</h2>
+<p>Status: P = peer-reviewed, W = workshop paper, X = arXiv preprint. Evidence: FT = key sections of the full text read (section, table or equation numbers are given where a detail comes from the full text), AB = abstract/metadata page only. Full-text details were checked in an AI-assisted pre-submission check on 6 November 2026 (see the AI-assistance declaration in the report).</p>
+<h3 id="hansen-gebhart-2020-sheaf-neural-networks-arxiv2012.06333">Hansen &amp; Gebhart 2020, Sheaf Neural Networks, arXiv:2012.06333</h3>
+<p><code>hansen2020sheaf</code> · status <strong>W</strong> · evidence <strong>FT</strong></p>
+<ul>
+<li><strong>Research question:</strong> Can the diffusion step of a GCN be generalised from the graph Laplacian to a sheaf Laplacian?</li>
+<li><strong>Method:</strong> Replace graph diffusion by sheaf-Laplacian diffusion with vector-space stalks and restriction maps.</li>
+<li><strong>Data / conditions:</strong> Synthetic semi-supervised node classification on signed graphs.</li>
+<li><strong>Metrics:</strong> Node-classification accuracy.</li>
+<li><strong>Main findings:</strong> Sheaf networks outperform Kipf–Welling GCN in the synthetic signed-graph setting (abstract).</li>
+<li><strong>Assumptions:</strong> The sheaf is hand-built from signed edge weights because standard datasets lack obvious sheaf structure (Sec. 4); learning the sheaf from data is listed only as future work (Sec. 5). The paper makes no claim about heterophily or oversmoothing.</li>
+<li><strong>Weaknesses / reproducibility:</strong> Synthetic data only; workshop paper; no real benchmark; no dynamic graphs.</li>
+<li><strong>Relation to RA-SCM:</strong> Origin of sheaf-based message passing. We reuse the sheaf-Laplacian operator, not any result.</li>
+</ul>
+<h3 id="bodnar-et-al.-2022-neural-sheaf-diffusion-neurips-arxiv2202.04579">Bodnar et al. 2022, Neural Sheaf Diffusion, NeurIPS (arXiv:2202.04579)</h3>
+<p><code>bodnar2022neural</code> · status <strong>P</strong> · evidence <strong>FT</strong></p>
+<ul>
+<li><strong>Research question:</strong> How does the (implicit trivial) sheaf of a GNN explain heterophily and oversmoothing, and can learning the sheaf fix both?</li>
+<li><strong>Method:</strong> Learn restriction maps from node features of the two endpoints of an edge; discretised sheaf diffusion layers; theory on linear separability and asymptotic behaviour.</li>
+<li><strong>Data / conditions:</strong> Nine node-classification benchmarks ordered by edge homophily h = 0.11–0.81: Texas, Wisconsin, Film, Squirrel, Chameleon, Cornell (heterophilic, h ≤ 0.30) and Citeseer, Pubmed, Cora (homophilic); 10 fixed 48/32/20 % splits of Pei et al. (Sec. 6, Table 1); plus a synthetic linear-separation experiment (Fig. 5).</li>
+<li><strong>Metrics:</strong> Mean test accuracy ± standard deviation over the 10 fixed splits (Sec. 6, Table 1); baseline figures are copied from Yan et al., Lingam et al. and Zhu et al. on the same splits, not re-run.</li>
+<li><strong>Main findings:</strong> Competitive (NeurIPS/arXiv abstract) or state-of-the-art (ICLR 2022 GTRL workshop abstract) results on heterophilic graphs; full text: first on 5 of 6 heterophilic benchmarks, second on Chameleon, top three on 8/9 datasets (Sec. 6, Table 1); non-trivial sheaves give control over diffusion limits.</li>
+<li><strong>Assumptions:</strong> Static graph; maps conditioned on node features only; no edge features, measurement noise or missing edges; homophily/heterophily as the task structure.</li>
+<li><strong>Weaknesses / reproducibility:</strong> Fixed benchmark splits; cost grows with stalk dimension; claims concern node classification, not detection of local inconsistencies; wording of the headline claim differs between venues (see search record).</li>
+<li><strong>Relation to RA-SCM:</strong> Baseline 4 (NSD-style sheaf) is an NSD-style implementation of this idea in our dense framework. RA-SCM adds edge-conditioned maps, translation term, reliability weights and temporal state.</li>
+</ul>
+<h3 id="barbero-et-al.-2022-sheaf-nns-with-connection-laplacians-pmlr-196">Barbero et al. 2022, Sheaf NNs with Connection Laplacians (PMLR 196)</h3>
+<p><code>barbero2022connection</code> · status <strong>W</strong> · evidence <strong>FT</strong> (Table 1, Sec. 5)</p>
+<ul>
+<li><strong>Research question:</strong> Is it necessary to learn the sheaf, or can restriction maps be computed from geometry?</li>
+<li><strong>Method:</strong> Orthogonal restriction maps aligning neighbouring local tangent spaces (manifold assumption), not learned.</li>
+<li><strong>Data / conditions:</strong> Node-classification benchmarks (abstract-level only).</li>
+<li><strong>Metrics:</strong> Accuracy.</li>
+<li><strong>Main findings:</strong> By the authors’ conclusion (Sec. 5), matches or beats the learned-sheaf models of Bodnar et al. on most datasets; Table 1 shows Conn-NSD best only on Texas and Film and clearly below learned NSD on Squirrel (45.19 vs 56.34), Chameleon (65.21 vs 68.68) and Cora (83.74 vs 87.30). The abstract claims only ‘promising results with less computational overhead’.</li>
+<li><strong>Assumptions:</strong> Data lie on a low-dimensional manifold; features are sufficient to estimate tangent spaces.</li>
+<li><strong>Weaknesses / reproducibility:</strong> Workshop paper; assumption is unverified for sensor data; static graphs.</li>
+<li><strong>Relation to RA-SCM:</strong> Partly contradicts the need for learned maps (vs NSD) and motivates physically-derived maps; our physics baseline is the extreme ‘fixed map’ case.</li>
+</ul>
+<h3 id="zaghen-et-al.-2024-nonlinear-sheaf-diffusion-pmlr-251">Zaghen et al. 2024, Nonlinear Sheaf Diffusion (PMLR 251)</h3>
+<p><code>zaghen2024nonlinear</code> · status <strong>W</strong> · evidence <strong>AB</strong></p>
+<ul>
+<li><strong>Research question:</strong> Can a learned nonlinearity inside the sheaf Laplacian capture antagonistic or bounded-confidence interactions?</li>
+<li><strong>Method:</strong> Nonlinear sheaf Laplacian with an adaptive learned function.</li>
+<li><strong>Data / conditions:</strong> Synthetic community-detection dataset.</li>
+<li><strong>Metrics:</strong> Node-classification accuracy.</li>
+<li><strong>Main findings:</strong> Beats linear sheaf networks and common GNN baselines on the synthetic task (abstract).</li>
+<li><strong>Assumptions:</strong> Synthetic opinion-dynamics-like interactions.</li>
+<li><strong>Weaknesses / reproducibility:</strong> Synthetic only, workshop paper.</li>
+<li><strong>Relation to RA-SCM:</strong> A robust (bounded) nonlinear aggregator could resist large anomalous residuals; not implemented here.</li>
+</ul>
+<h3 id="hansen-ghrist-2019-toward-a-spectral-theory-of-cellular-sheaves-j.-appl.-comput.-topol.-34">Hansen &amp; Ghrist 2019, Toward a spectral theory of cellular sheaves, J. Appl. Comput. Topol. 3(4)</h3>
+<p><code>hansen2019spectral</code> · status <strong>P</strong> · evidence <strong>FT</strong></p>
+<ul>
+<li><strong>Research question:</strong> What are the spectral properties of the sheaf Laplacian and how do they relate to cohomology and graph structure?</li>
+<li><strong>Method:</strong> Hodge-type Laplacian of cellular sheaves; interlacing, sparsification, effective resistance, synchronisation (abstract).</li>
+<li><strong>Data / conditions:</strong> Theory.</li>
+<li><strong>Metrics:</strong> n/a</li>
+<li><strong>Main findings:</strong> Foundations of sheaf Laplacian spectra; links kernel to global sections.</li>
+<li><strong>Assumptions:</strong> Finite regular cell complexes with finite-dimensional stalks (Sec. 3.3); a weighted sheaf puts inner products on stalks, which fix the adjoint δ* and so the Laplacian Δ = δ<em>δ + δδ</em> (Secs 3.1–3.2); scaling an edge stalk’s inner product changes the weight given to discrepancies over that edge (Sec. 3.5).</li>
+<li><strong>Weaknesses / reproducibility:</strong> No learning or noisy data.</li>
+<li><strong>Relation to RA-SCM:</strong> Justifies treating reliability weights as a choice of inner product on edge stalks (L_w = δᵀWδ) rather than a new operator.</li>
+</ul>
+<h3 id="robinson-2017-sheaves-are-the-canonical-data-structure-for-sensor-integration-information-fusion-36">Robinson 2017, Sheaves are the canonical data structure for sensor integration, Information Fusion 36</h3>
+<p><code>robinson2017sheaves</code> · status <strong>P</strong> · evidence <strong>AB</strong></p>
+<ul>
+<li><strong>Research question:</strong> What mathematical structure can represent heterogeneous information sources faithfully and expose inconsistency?</li>
+<li><strong>Method:</strong> Sheaves of sensor data; consistency radius, constrained fusion, cohomology for ‘blind spots’.</li>
+<li><strong>Data / conditions:</strong> Expository, illustrative examples.</li>
+<li><strong>Metrics:</strong> n/a</li>
+<li><strong>Main findings:</strong> Sheaves give a sensor-agnostic consistency measure, fusion method and blind-spot detection (abstract).</li>
+<li><strong>Assumptions:</strong> Sensor relationships must be specified by the modeller; exact data model.</li>
+<li><strong>Weaknesses / reproducibility:</strong> Expository; no learning, no quantitative evaluation of detection.</li>
+<li><strong>Relation to RA-SCM:</strong> Conceptual foundation of the inconsistency measure r_ij and of the identifiability discussion.</li>
+</ul>
+<h3 id="joslyn-et-al.-2020-a-sheaf-theoretical-approach-to-uncertainty-quantification-of-heterogeneous-geolocation-information-sensors-2012">Joslyn et al. 2020, A sheaf theoretical approach to uncertainty quantification of heterogeneous geolocation information, Sensors 20(12)</h3>
+<p><code>joslyn2020sheaf</code> · status <strong>P</strong> · evidence <strong>FT(partial)</strong></p>
+<ul>
+<li><strong>Research question:</strong> How can the agreement among heterogeneous geolocation sensors be quantified?</li>
+<li><strong>Method:</strong> Sheaf over a simplicial complex of sensors; ε-consistency radius and consistency filtration; comparison with a Kalman-filter dynamic linear model.</li>
+<li><strong>Data / conditions:</strong> Field experiment: 12 GPS collars (6 stationary decoy collars and 6 active collars on three wild black bears; twelve locating sessions), four sensor types (collar GPS, VHF, text report, vehicle GPS), 16 observations per 2-h session (Secs 3.2, 5).</li>
+<li><strong>Metrics:</strong> Consistency radius (m) and filtration.</li>
+<li><strong>Main findings:</strong> Radius decreases as the VHF error shrinks when the team approaches; largest discrepancy VHF vs collar GPS at the analysed instant (464.5 m).</li>
+<li><strong>Assumptions:</strong> Sensor relationships and coordinate conversions specified in advance; time slices analysed independently.</li>
+<li><strong>Weaknesses / reproducibility:</strong> The radius alone does not say which measurement is wrong; the consistency filtration attributes disagreement to sensors (Sec. 4, 5.1), but the authors state that neither reports which measurements are trustworthy (Conclusion); small case study; no learning, no dynamics, no communication or missing-data model.</li>
+<li><strong>Relation to RA-SCM:</strong> Closest prior use of sheaf consistency for geolocation fusion; shows that consistency can flag and attribute disagreement, but not separate missing from wrong data — the ambiguity we study.</li>
+</ul>
+<h3 id="hanks-et-al.-2025-distributed-multi-agent-coordination-over-cellular-sheaves-arxiv2504.02049">Hanks et al. 2025, Distributed multi-agent coordination over cellular sheaves, arXiv:2504.02049</h3>
+<p><code>hanks2025distributed</code> · status <strong>X</strong> · evidence <strong>FT(partial)</strong></p>
+<ul>
+<li><strong>Research question:</strong> Can heterogeneous multi-agent coordination (consensus, formation, flocking) be cast over cellular sheaves?</li>
+<li><strong>Method:</strong> Nonlinear homological programs on sheaves; ADMM with a local nonlinear sheaf heat equation.</li>
+<li><strong>Data / conditions:</strong> Simulations with three planar double-integrator vehicles; a UAV/USV/UUV case study described but not simulated.</li>
+<li><strong>Metrics:</strong> Convergence of simulated goals.</li>
+<li><strong>Main findings:</strong> Consensus, formation and flocking solved in the examples.</li>
+<li><strong>Assumptions:</strong> Fixed undirected topology; no packet loss, delay or failures modelled; convex potentials.</li>
+<li><strong>Weaknesses / reproducibility:</strong> Tiny simulations; preprint; learning/GNN integration listed only as future work.</li>
+<li><strong>Relation to RA-SCM:</strong> Shows sheaves for multi-agent <em>control</em> under reliable fixed topology — contrasts with our time-varying unreliable network.</li>
+</ul>
+<h3 id="ribeiro-et-al.-2026-cooperative-sheaf-neural-networks-iclr-2026-arxiv2507.00647">Ribeiro et al. 2026, Cooperative Sheaf Neural Networks, ICLR 2026 (arXiv:2507.00647)</h3>
+<p><code>ribeiro2025cooperative</code> · status <strong>P</strong> (ICLR 2026 poster, OpenReview AHpexliCTM) · evidence <strong>AB</strong></p>
+<ul>
+<li><strong>Research question:</strong> How to extend sheaf networks to directed graphs?</li>
+<li><strong>Method:</strong> Cooperative sheaf Laplacian with a pair of learned maps per node [abstract-level].</li>
+<li><strong>Data / conditions:</strong> not extracted</li>
+<li><strong>Metrics:</strong> not extracted</li>
+<li><strong>Main findings:</strong> not extracted</li>
+<li><strong>Assumptions:</strong> Directed message flow.</li>
+<li><strong>Weaknesses / reproducibility:</strong> Not read beyond abstract.</li>
+<li><strong>Relation to RA-SCM:</strong> Directed links resemble asymmetric packet delivery; not used.</li>
+</ul>
+<h3 id="asif-et-al.-2026-temporal-sheaf-nns-with-dynamic-orthogonal-transport-arxiv2606.10071">Asif et al. 2026, Temporal Sheaf NNs with Dynamic Orthogonal Transport, arXiv:2606.10071</h3>
+<p><code>asif2026temporal</code> · status <strong>X</strong> · evidence <strong>AB</strong></p>
+<ul>
+<li><strong>Research question:</strong> Can time-varying node frames improve temporal link prediction?</li>
+<li><strong>Method:</strong> Per-node time-varying orthogonal frames (Householder products), transport before comparison, geometric-residual decoder, causal computation.</li>
+<li><strong>Data / conditions:</strong> TGB v2 and DGB temporal-graph benchmarks.</li>
+<li><strong>Metrics:</strong> Link-prediction metrics (abstract: ‘matches or beats strong prior methods on most tasks’).</li>
+<li><strong>Main findings:</strong> Gains attributed to dynamic frames, orthogonal transport and geometric-residual decoder (ablations).</li>
+<li><strong>Assumptions:</strong> Event streams, no measurement noise or missing observation semantics.</li>
+<li><strong>Weaknesses / reproducibility:</strong> Preprint; peer review not indicated; task is link prediction.</li>
+<li><strong>Relation to RA-SCM:</strong> Closest sheaf + dynamic-graph work; confirms that dynamic sheaves are of current interest but for a different task. Not anomaly detection, not reliability-aware.</li>
+</ul>
+<h3 id="hernández-sánchez-soto-2026-the-sheaf-laplacian-data-fusion-and-consensus-in-distributed-sensing-networks-arxiv2606.19529">Hernández &amp; Sánchez-Soto 2026, The Sheaf Laplacian: data fusion and consensus in distributed sensing networks, arXiv:2606.19529</h3>
+<p><code>hernandez2026sheaf</code> · status <strong>X</strong> · evidence <strong>FT</strong></p>
+<ul>
+<li><strong>Research question:</strong> Is the sheaf Laplacian a suitable mechanism for data fusion and consensus in distributed sensing?</li>
+<li><strong>Method:</strong> Sheaf-theoretic framework; Sec. 7 proposes the sheaf Dirichlet energy and a spectral variant as anomaly scores and localises a faulty node from per-edge energy contributions (Sec. 7.3).</li>
+<li><strong>Data / conditions:</strong> None (conceptual paper, 10 pp.); drone swarms named as an application (Sec. 1).</li>
+<li><strong>Metrics:</strong> None.</li>
+<li><strong>Main findings:</strong> Proposes Dirichlet-energy anomaly detection and faulty-node localisation; no evaluation.</li>
+<li><strong>Assumptions:</strong> Fixed maps; packet loss, intermittent links and topology changes named as challenges (Sec. 2.1) but not modelled inside the detector.</li>
+<li><strong>Weaknesses / reproducibility:</strong> No experiments, no loss model, no learning.</li>
+<li><strong>Relation to RA-SCM:</strong> An unweighted, loss-free ancestor of our AoI-aware physics baseline; it contradicts any claim that sheaf work ignores anomaly detection.</li>
+</ul>
+<h3 id="kipf-welling-2017-gcn-iclr">Kipf &amp; Welling 2017, GCN, ICLR</h3>
+<p><code>kipf2017semi</code> · status <strong>P</strong> · evidence <strong>FT</strong></p>
+<ul>
+<li><strong>Research question:</strong> Scalable semi-supervised learning on graphs.</li>
+<li><strong>Method:</strong> Localised first-order approximation of spectral graph convolutions with the renormalisation trick Â = D̃^-1/2 Ã D̃^-1/2, Ã = A + I, D̃ = degree matrix of Ã (Sec. 2, Eqs 2 and 8).</li>
+<li><strong>Data / conditions:</strong> Citation networks Citeseer, Cora, Pubmed and the NELL knowledge-graph dataset; splits of Yang et al. (2016) (citation networks: 20 labels per class), 500 validation and 1,000 test nodes (Secs 5.1–5.2, Table 1).</li>
+<li><strong>Metrics:</strong> Classification accuracy (%), mean of 100 runs with random weight initialisations; wall-clock training time (Sec. 6.1, Table 2).</li>
+<li><strong>Main findings:</strong> Outperforms related methods by a significant margin (abstract): 70.3 / 81.5 / 79.0 / 66.0 % on Citeseer / Cora / Pubmed / NELL vs best baselines 69.1 / 75.7 / 77.2 / 61.9 % (Table 2).</li>
+<li><strong>Assumptions:</strong> Undirected graph without native edge features; implicit locality and equal weight of self-loop and neighbours (Sec. 7.2); single static graph, transductive node classification (Sec. 4.2). The label-homophily assumption is stated for Laplacian regularisation (Sec. 1), which GCN replaces.</li>
+<li><strong>Weaknesses / reproducibility:</strong> Degrades with depth: best at 2–3 layers, hard to train beyond 7 layers without residual connections (App. B); full-batch memory grows linearly with graph size (Sec. 7.2); single static graph; below an MLP on heterophilic graphs in NSD’s Table 1 (e.g. Texas 55.1 vs 80.8 %).</li>
+<li><strong>Relation to RA-SCM:</strong> Baseline 2 (GCN).</li>
+</ul>
+<h3 id="veličković-et-al.-2018-gat-iclr">Veličković et al. 2018, GAT, ICLR</h3>
+<p><code>velickovic2018graph</code> · status <strong>P</strong> · evidence <strong>FT</strong></p>
+<ul>
+<li><strong>Research question:</strong> Learn neighbour weights by attention.</li>
+<li><strong>Method:</strong> Masked self-attention over first-order neighbourhoods (LeakyReLU scores, softmax-normalised), K heads concatenated or averaged in the output layer (Sec. 2.1).</li>
+<li><strong>Data / conditions:</strong> Transductive: Cora, Citeseer, Pubmed citation networks (20 labels per class, 500 validation / 1,000 test nodes); inductive: PPI, 20 / 2 / 2 train / val / test graphs with test graphs unseen, 121 multi-labels (Sec. 3.1).</li>
+<li><strong>Metrics:</strong> Transductive: mean accuracy ± s.d. over 100 runs; inductive: micro-averaged F1 on the two unseen test graphs, mean of 10 runs (Sec. 3.4, Tables 2–3).</li>
+<li><strong>Main findings:</strong> Achieves or matches state of the art on all four benchmarks (Tables 2–3): +1.5 / +1.6 points over the best GCN on Cora / Citeseer (83.0 / 72.5 %), equal to GCN on Pubmed (79.0 %); PPI micro-F1 0.973 vs 0.768 (best GraphSAGE) and 0.934 (constant-attention GAT).</li>
+<li><strong>Assumptions:</strong> Attention scores computed from node features only, a^T[Wh_i ‖ Wh_j] (Sec. 2.1).</li>
+<li><strong>Weaknesses / reproducibility:</strong> Attention is not a calibrated reliability weight; no edge features (left to future work, Sec. 4).</li>
+<li><strong>Relation to RA-SCM:</strong> Baseline 3 (GAT).</li>
+</ul>
+<h3 id="deng-hooi-2021-graph-neural-network-based-anomaly-detection-in-multivariate-time-series-aaai-355">Deng &amp; Hooi 2021, Graph neural network-based anomaly detection in multivariate time series, AAAI 35(5)</h3>
+<p><code>deng2021graph</code> · status <strong>P</strong> · evidence <strong>FT</strong></p>
+<ul>
+<li><strong>Research question:</strong> Detect anomalies in multivariate sensor time series when inter-sensor relationships are unknown.</li>
+<li><strong>Method:</strong> Learn a sensor graph from embedding similarity; graph-attention forecasting; deviation score; attention-based explanation.</li>
+<li><strong>Data / conditions:</strong> SWaT (51 sensors) and WADI (127 sensors) water-treatment testbeds: two weeks of normal operation for training, test sets with staged attacks (11.97 % / 5.99 % anomalous); 10-s median downsampling, first 2160 samples dropped (Sec. 4.1, Table 1).</li>
+<li><strong>Metrics:</strong> Precision, recall and F1 over test time ticks, chosen for class imbalance (Sec. 4.3, Table 2).</li>
+<li><strong>Main findings:</strong> Detects anomalies more accurately than baselines and helps root-cause identification (abstract): F1 0.81 on SWaT and 0.57 on WADI with precision ≈ 0.98–0.99 but recall 0.40–0.68 (Table 2; part of the baseline numbers taken from Li et al. 2019).</li>
+<li><strong>Assumptions:</strong> Same fixed N sensors in training and test, training data assumed normal, one complete N-dimensional reading per time tick (Sec. 3.1); no missing-data or communication model; single fixed threshold = max of the SMA-smoothed score on validation data (Secs 3.6, 4.3), so reported F1 is tied to this rule (alternatives such as EVT mentioned, not evaluated).</li>
+<li><strong>Weaknesses / reproducibility:</strong> F1 depends on threshold rule; no missing-data semantics; static learned graph.</li>
+<li><strong>Relation to RA-SCM:</strong> Representative of graph-based sensor anomaly detection; we add missingness/staleness as a first-class confound and a dynamic physical graph.</li>
+</ul>
+<h3 id="dang-karakoc-jäntti-2023-gnn-based-gps-spoofing-detection-for-cellular-connected-uav-swarm-ieee-vtc-spring">Dang, Karakoc &amp; Jäntti 2023, GNN-based GPS spoofing detection for cellular-connected UAV swarm, IEEE VTC-Spring</h3>
+<p><code>dang2023graphic</code> · status <strong>P</strong> · evidence <strong>FT</strong></p>
+<ul>
+<li><strong>Research question:</strong> Detect GPS spoofing in a UAV swarm using a GNN.</li>
+<li><strong>Method:</strong> GCN (SimGNN-style) + GRU compare the swarm GPS topology (distances) with the communication topology (free-space path loss); threshold on predicted graph-edit similarity.</li>
+<li><strong>Data / conditions:</strong> Own Python/TensorFlow simulator with 6, 8 and 10 UAVs, wind and GPS noise, a spoofing attacker; no real data.</li>
+<li><strong>Metrics:</strong> Accuracy (&gt;90% for 10 UAVs), computation time (&lt;10 ms vs ≈16 s for exact GED).</li>
+<li><strong>Main findings:</strong> Accuracy decreases as GPS error grows; GRU converges faster than LSTM.</li>
+<li><strong>Assumptions:</strong> Spoofing does not affect swarm/BS communication; communication topology reflects true geometry (path-loss); path loss is a reliable reference.</li>
+<li><strong>Weaknesses / reproducibility:</strong> Simulation only; accuracy without class balance or PR-AUC; communication treated as trustworthy ground reference, packet loss/staleness not modelled although the text acknowledges environmental effects on the communication topology.</li>
+<li><strong>Relation to RA-SCM:</strong> Closest GNN spoof-detector for swarms; it uses the channel as <em>independent evidence</em>, whereas we treat the channel as an <em>unreliable</em> source and test robustness to it.</li>
+</ul>
+<h3 id="mykytyn-et-al.-2023-gps-spoofing-attack-detection-mechanism-for-uav-swarms-meco-arxiv2301.12766">Mykytyn et al. 2023, GPS-spoofing attack detection mechanism for UAV swarms, MECO (arXiv:2301.12766)</h3>
+<p><code>mykytyn2023gps</code> · status <strong>P</strong> · evidence <strong>FT</strong></p>
+<ul>
+<li><strong>Research question:</strong> Detect single- and multi-transmitter GPS spoofing in a swarm without extra hardware beyond ranging.</li>
+<li><strong>Method:</strong> Compare GPS-derived inter-UAV distances with IR-UWB ranging; flag if the discrepancy exceeds a threshold (with timestamp tolerance).</li>
+<li><strong>Data / conditions:</strong> None — the text states this is the initial stage and that detection and false-positive rates will be presented later.</li>
+<li><strong>Metrics:</strong> None reported.</li>
+<li><strong>Main findings:</strong> Qualitative argument that the mechanism is simple and low-cost.</li>
+<li><strong>Assumptions:</strong> Ranging available and synchronised with GPS timestamps; thresholds from sensor accuracy.</li>
+<li><strong>Weaknesses / reproducibility:</strong> No empirical results in the version read; thresholding only.</li>
+<li><strong>Relation to RA-SCM:</strong> Defines the independent-ranging principle used by our physics baseline and by the identifiability condition.</li>
+</ul>
+<h3 id="bi-et-al.-2024-detection-and-mitigation-of-position-spoofing-attacks-on-cooperative-uav-swarm-formations-ieee-tifs-19">Bi et al. 2024, Detection and mitigation of position spoofing attacks on cooperative UAV swarm formations, IEEE TIFS 19</h3>
+<p><code>bi2024detection</code> · status <strong>P</strong> · evidence <strong>FT(partial)</strong></p>
+<ul>
+<li><strong>Research question:</strong> Identify malicious UAVs that falsify reported positions (distributed, collusion, mixed attacks).</li>
+<li><strong>Method:</strong> Localisation-feasibility problem with reported positions + pairwise distance measurements; semidefinite relaxation; two algorithms exploiting neighbour proximity.</li>
+<li><strong>Data / conditions:</strong> Matlab simulations of swarms with Gaussian position and ranging noise.</li>
+<li><strong>Metrics:</strong> Detection success rate (up to +65%, +55%, +51% vs benchmarks).</li>
+<li><strong>Main findings:</strong> Outperforms benchmarks against the three attack types in simulation.</li>
+<li><strong>Assumptions:</strong> All UAVs report positions and range neighbours; reports and measurements are received (no packet loss appears in the text); snapshot (non-temporal) formulation.</li>
+<li><strong>Weaknesses / reproducibility:</strong> Convex-relaxation cost; no temporal evidence; no unreliable-communication model; no learning.</li>
+<li><strong>Relation to RA-SCM:</strong> Strongest model-based competitor in principle (not re-implemented here — disclosed). Its feasibility test is the identifiability principle we use; communication unreliability would convert ‘infeasible’ into ‘missing’.</li>
+</ul>
+<h3 id="tolstaya-et-al.-2020-learning-decentralized-controllers-for-robot-swarms-with-gnns-corl-pmlr-100">Tolstaya et al. 2020, Learning decentralized controllers for robot swarms with GNNs, CoRL (PMLR 100)</h3>
+<p><code>tolstaya2020learning</code> · status <strong>P</strong> · evidence <strong>FT</strong></p>
+<ul>
+<li><strong>Research question:</strong> Learn local controllers for large teams with limited communication.</li>
+<li><strong>Method:</strong> Aggregation GNNs on time-varying communication graphs, imitation of a centralised controller.</li>
+<li><strong>Data / conditions:</strong> Simulated flocking with a changing communication graph.</li>
+<li><strong>Metrics:</strong> Control performance (abstract).</li>
+<li><strong>Main findings:</strong> Multi-hop information from distant teammates helps more when the communication radius is small or speeds are high (abstract).</li>
+<li><strong>Assumptions:</strong> Each communication exchange adds one step of delay (k-hop information is k steps old, Secs 2–3, ‘Delayed Aggregation GNNs’); no packet loss or link failure.</li>
+<li><strong>Weaknesses / reproducibility:</strong> Control, not detection; delivery failures not modelled.</li>
+<li><strong>Relation to RA-SCM:</strong> Evidence that GNNs on dynamic swarm graphs are practical; its delayed information structure is the precursor of our delayed-message semantics.</li>
+</ul>
+<h3 id="cini-marisca-alippi-2022-grin-multivariate-time-series-imputation-by-gnns-iclr">Cini, Marisca &amp; Alippi 2022, GRIN: multivariate time-series imputation by GNNs, ICLR</h3>
+<p><code>cini2022filling</code> · status <strong>P</strong> · evidence <strong>AB</strong></p>
+<ul>
+<li><strong>Research question:</strong> Reconstruct missing values in sensor-network time series.</li>
+<li><strong>Method:</strong> Bidirectional spatio-temporal message passing recurrent GNN.</li>
+<li><strong>Data / conditions:</strong> Real-world sensor benchmarks (abstract-level).</li>
+<li><strong>Metrics:</strong> MAE (improvements often &gt;20% over prior state of the art, abstract).</li>
+<li><strong>Main findings:</strong> Graph-aware imputation beats non-graph imputers.</li>
+<li><strong>Assumptions:</strong> Missingness is the only data defect (no adversarial or drifting values).</li>
+<li><strong>Weaknesses / reproducibility:</strong> Does not separate missing from corrupted data; imputation, not detection.</li>
+<li><strong>Relation to RA-SCM:</strong> Shows graphs help with <em>missing</em> data; our problem is the confusion between missing and <em>corrupted</em> data.</li>
+</ul>
+<h3 id="zhu-et-al.-2019-robust-gcns-against-adversarial-attacks-kdd">Zhu et al. 2019, Robust GCNs against adversarial attacks, KDD</h3>
+<p><code>zhu2019robust</code> · status <strong>P</strong> · evidence <strong>AB</strong></p>
+<ul>
+<li><strong>Research question:</strong> Make GCNs robust to adversarially perturbed graphs.</li>
+<li><strong>Method:</strong> Gaussian node representations; variance-based attention reduces the weight of nodes with high variance.</li>
+<li><strong>Data / conditions:</strong> Three benchmark citation graphs.</li>
+<li><strong>Metrics:</strong> Node-classification accuracy.</li>
+<li><strong>Main findings:</strong> Substantial accuracy gains against several attack strategies (abstract).</li>
+<li><strong>Assumptions:</strong> Variance reflects attack influence.</li>
+<li><strong>Weaknesses / reproducibility:</strong> Variance is learned, not tied to a physical reliability variable.</li>
+<li><strong>Relation to RA-SCM:</strong> Prior art for uncertainty-weighted aggregation against <em>corrupted</em> (adversarial) inputs, not missing data: reliability <em>weighting</em> is <strong>not</strong> new in GNNs; our weights use explicit communication metadata (age, delivery, link quality).</li>
+</ul>
+<hr />
+<h3 id="round-2-additions-pre-submission-check-6-november-2026">Round 2 additions (pre-submission check, 6 November 2026)</h3>
+<p>The entries below were added after the IEEE/ACM-oriented search of round 2 (see S1). Every record was confirmed on Crossref or the arXiv API; content statements come from the abstract (AB) or from the stated full-text sections (FT).</p>
+<h3 id="chen-meng-li-liao-2022-cooperative-fault-detection-and-recovery-in-the-gnss-positioning-of-mobile-agent-swarms-based-on-relative-distance-measurements-chinese-j.-aeronautics-355">Chen, Meng, Li &amp; Liao 2022, Cooperative fault detection and recovery in the GNSS positioning of mobile agent swarms based on relative distance measurements, Chinese J. Aeronautics 35(5)</h3>
+<p><code>chen2022cooperative</code> · status <strong>P</strong> · evidence <strong>AB</strong> (publisher PDF not accessible)</p>
+<ul>
+<li><strong>Method:</strong> Noncentral χ² test of each edge (reported versus measured distance), maximum-likelihood identification of the faulty vertex, distance-based recovery; detectability and recoverability related to the structure of the relative-measurement network.</li>
+<li><strong>Data / conditions:</strong> Simulation of a swarm crossing a GNSS spoofing zone.</li>
+<li><strong>Assumptions:</strong> Current, delivered measurements; no packet loss, delay or staleness mentioned.</li>
+<li><strong>Relation to RA-SCM:</strong> Direct model-based predecessor of our physics baseline; our AoI-aware variant adds an age-dependent covariance.</li>
+</ul>
+<h3 id="he-shan-huang-2024-robust-cooperative-localization-with-failed-communication-and-biased-measurements-ieee-ra-l-93">He, Shan &amp; Huang 2024, Robust Cooperative Localization With Failed Communication and Biased Measurements, IEEE RA-L 9(3)</h3>
+<p><code>he2024robust</code> · status <strong>P</strong> · evidence <strong>AB</strong></p>
+<ul>
+<li><strong>Method:</strong> Decentralised CL that decouples measurement from communication; other robots’ states propagated by an approximate motion model during outages; M-estimation down-weights biased measurements. Simulation.</li>
+<li><strong>Relation to RA-SCM:</strong> Handles failed communication and faulty measurements <em>jointly</em>, but as robust estimation scored by localisation error, not as detection; not UAV-specific, not learned.</li>
+</ul>
+<h3 id="kargar-tasooji-parasuraman-2025-distributed-fault-tolerant-multi-robot-cooperative-localization-in-adversarial-environments-iros-2025">Kargar Tasooji &amp; Parasuraman 2025, Distributed Fault-Tolerant Multi-Robot Cooperative Localization in Adversarial Environments, IROS 2025</h3>
+<p><code>kargartasooji2025distributed</code> · status <strong>P</strong> · evidence <strong>FT</strong> (arXiv:2507.06750, Sec. III-B, Eq. 8)</p>
+<ul>
+<li><strong>Method:</strong> Distributed cubature Kalman filter; innovation-norm gate discards manipulated measurements; binary per-link success indicator in jammed zones (prediction-only on failure); adaptive event-triggered communication. Robotarium ground robots.</li>
+<li><strong>Metrics:</strong> Localisation error (MSLE) and communication rate; detection itself is not scored (no ROC/AUC/F1, no seeds).</li>
+<li><strong>Relation to RA-SCM:</strong> Closest classical work combining attacks and link failure; link loss is ridden through, not distinguished from attacks.</li>
+</ul>
+<h3 id="cao-zhao-wu-wang-gong-2026-quality-aware-distributed-state-estimation-for-multi-uav-cooperative-localization-under-communication-and-navigation-constraints-drones-106">Cao, Zhao, Wu, Wang &amp; Gong 2026, Quality-Aware Distributed State Estimation for Multi-UAV Cooperative Localization Under Communication and Navigation Constraints, Drones 10(6)</h3>
+<p><code>cao2026quality</code> · status <strong>P</strong> · evidence <strong>AB</strong></p>
+<ul>
+<li><strong>Method:</strong> Per-neighbour multiplicative quality score from freshness (AoI), accuracy (covariance trace) and link reliability (packet loss, channel noise); AND-gate excludes neighbours degraded in both AoI and covariance; quality-squared information update with covariance-intersection fallback; theorems on soft attenuation of single-axis faults.</li>
+<li><strong>Metrics:</strong> Position RMSE in Monte Carlo runs (3–50 UAVs).</li>
+<li><strong>Relation to RA-SCM:</strong> Closest model-based analogue of AoI- and link-quality-driven weighting; an estimator, not a detector, with no learned or graph comparison.</li>
+</ul>
+<h3 id="ou-liang-lam-2023-fpecmv-learning-based-fault-tolerant-collaborative-localization-under-limited-connectivity-iros-2023">Ou, Liang &amp; Lam 2023, FPECMV: Learning-Based Fault-Tolerant Collaborative Localization Under Limited Connectivity, IROS 2023</h3>
+<p><code>ou2023fpecmv</code> · status <strong>P</strong> · evidence <strong>AB</strong></p>
+<ul>
+<li><strong>Method:</strong> CNN-based confidence evaluation and a fault-isolation module using randomly occurring relative measurements, for CL with limited or discontinued observation and communication; BULLET simulation and physical robots (21.0% localisation improvement).</li>
+<li><strong>Relation to RA-SCM:</strong> Learned fault handling under limited connectivity, but judged on localisation accuracy, ground robots, no controlled loss model.</li>
+</ul>
+<h3 id="vijay-et-al.-2025-range-based-multi-robot-integrity-monitoring-for-cyberattacks-and-faults-an-anchor-free-approach-ieee-ra-l-103">Vijay et al. 2025, Range-Based Multi-Robot Integrity Monitoring For Cyberattacks and Faults: An Anchor-Free Approach, IEEE RA-L 10(3)</h3>
+<p><code>vijay2025range</code> · status <strong>P</strong> · evidence <strong>FT</strong> (arXiv:2408.11155, Sec. III-B)</p>
+<ul>
+<li><strong>Method:</strong> Inter-robot ranges detect and identify attacked or faulty robots and reconstruct their errors (sequential convex programming + ADMM); PX4-SITL/Gazebo under GNSS spoofing and real Crazyflie UAVs.</li>
+<li><strong>Assumptions:</strong> Synchronous communication between neighbours (Sec. III-B).</li>
+<li><strong>Relation to RA-SCM:</strong> Strongest model-based range-consistency detector found; delivery assumed.</li>
+</ul>
+<h3 id="michieletto-formaggio-cenedese-tomasin-2023-robust-localization-for-secure-navigation-of-uav-formations-under-gnss-spoofing-attack-ieee-t-ase-204">Michieletto, Formaggio, Cenedese &amp; Tomasin 2023, Robust Localization for Secure Navigation of UAV Formations Under GNSS Spoofing Attack, IEEE T-ASE 20(4)</h3>
+<p><code>michieletto2023robust</code> · status <strong>P</strong> · evidence <strong>AB</strong></p>
+<ul>
+<li><strong>Method:</strong> Information-theoretic threshold test of consistency between inertial, relative-ranging and GNSS data, then reliability-based fusion; numerical validation.</li>
+<li><strong>Relation to RA-SCM:</strong> Multimodal consistency testing for formations; no communication-loss model.</li>
+</ul>
+<h3 id="park-yoo-2026-rigid-covert-gnss-spoofing-of-uav-swarms-arxiv2608.06885">Park &amp; Yoo 2026, Rigid-Covert GNSS Spoofing of UAV Swarms, arXiv:2608.06885</h3>
+<p><code>park2026rigid</code> · status <strong>X</strong> · evidence <strong>FT</strong></p>
+<ul>
+<li><strong>Main findings:</strong> A common, slowly varying offset of the whole swarm preserves all pairwise distances and is unobservable to relative-only detectors (distance-verification and SDP baselines near chance AUC over 200 seeds); anchor-based detection floor and recovery (simulation, SITL, Gazebo). Ranging packet loss is swept only for recovery.</li>
+<li><strong>Relation to RA-SCM:</strong> Formal support for our identifiability statement; RA-SCM inherits this blind spot.</li>
+</ul>
+<h3 id="sophia-et-al.-2026-zero-trust-graph-attentive-intelligence-for-byzantine-resilient-uav-swarms-under-communication-constraints-discover-electronics-31">Sophia et al. 2026, Zero-trust graph-attentive intelligence for Byzantine-resilient UAV swarms under communication constraints, Discover Electronics 3(1)</h3>
+<p><code>sophia2026zerotrust</code> · status <strong>P</strong> · evidence <strong>AB</strong> (Springer full text not retrievable)</p>
+<ul>
+<li><strong>Method:</strong> 8-head GAT with a zero-trust layer (behavioural scoring, attestation, neighbourhood analysis); UAVSwarm data with a Byzantine and communication overlay (spoofing, replay, Sybil, gradient poisoning; 5–33% corrupted nodes).</li>
+<li><strong>Metrics:</strong> Byzantine F1 96.8% (model-level comparison; 92.83% mean over 12 attack × corruption conditions), trust accuracy, consensus latency, packet delivery ratio.</li>
+<li><strong>Relation to RA-SCM:</strong> Learned graph detector for swarms in which communication is a bandwidth constraint and an outcome, not a modelled confounder of position-consistency evidence; no physics baseline.</li>
+</ul>
+<h3 id="pan-et-al.-2026-satellite-aided-multi-uav-secure-collaborative-localization-via-spatio-temporal-anomaly-detection-and-diagnosis-drones-101">Pan et al. 2026, Satellite-Aided Multi-UAV Secure Collaborative Localization via Spatio-Temporal Anomaly Detection and Diagnosis, Drones 10(1)</h3>
+<p><code>pan2026satellite</code> · status <strong>P</strong> · evidence <strong>AB</strong></p>
+<ul>
+<li><strong>Method:</strong> GAT with a time-attention VAE on multidimensional ranging sequences detects false ranging data from malicious UAVs; diagnosis by anomaly scoring; KNN correction (simulation; +25.9% localisation accuracy).</li>
+<li><strong>Relation to RA-SCM:</strong> Closest learned graph detector on relative (ranging) data; delivery of measurements assumed.</li>
+</ul>
+<h3 id="tariq-ahanger-shaukat-2026-tri-stream-multi-model-architecture-for-real-time-detection-of-beidou-signal-manipulation-in-uav-swarms-scientific-reports-16">Tariq, Ahanger &amp; Shaukat 2026, Tri-stream multi-model architecture for real-time detection of BeiDou signal manipulation in UAV swarms, Scientific Reports 16</h3>
+<p><code>tariq2026tristream</code> · status <strong>P</strong> · evidence <strong>FT</strong> (PMC full text)</p>
+<ul>
+<li><strong>Method:</strong> Kalman-residual tracking plus CNN/LSTM/GNN fusion and a transformer-based language model; software-in-the-loop simulation (97 ± 0.6% detection accuracy).</li>
+<li><strong>Conditions:</strong> Simulator with per-packet delay, burst-capable packet drop, bandwidth caps, freshness-window gating and jamming; paired t-tests over matched seeds. Inter-UAV ranging is not used.</li>
+<li><strong>Relation to RA-SCM:</strong> A learned graph swarm detector run under modelled loss (sensitivity to delay and loss is mentioned but not shown); no loss-stratified results and no physics-only arm are reported.</li>
+</ul>
+<h3 id="tariq-shaukat-2026-mission-aware-beidou-spoofing-defense-in-uav-swarms-with-llm-assisted-context-validation-frontiers-in-communications-and-networks-7">Tariq &amp; Shaukat 2026, Mission-aware BeiDou spoofing defense in UAV swarms with LLM-assisted context validation, Frontiers in Communications and Networks 7</h3>
+<p><code>tariq2026mission</code> · status <strong>P</strong> · evidence <strong>FT</strong></p>
+<ul>
+<li><strong>Method:</strong> OrbitGuardNet: transformer encoders, GNNs and Kalman-residual analysis with LLM context validation; UWB inter-UAV ranging; simulation and pilot flights with three UAVs (software-injected spoofing).</li>
+<li><strong>Conditions:</strong> Gilbert–Elliott channel with delays and bursty loss (Sec. 2.1.3); paired t-tests; packet loss named as a future test condition, not varied.</li>
+<li><strong>Relation to RA-SCM:</strong> Closest learned work; lacks loss as a controlled confounder and a standalone age-aware physics baseline.</li>
+</ul>
+<h3 id="moustafa-abdelghany-2026-finite-trace-cellular-sheaves-for-validation-and-estimation-of-hybrid-dynamical-systems-ieee-control-systems-letters-10">Moustafa &amp; Abdelghany 2026, Finite-Trace Cellular Sheaves for Validation and Estimation of Hybrid Dynamical Systems, IEEE Control Systems Letters 10</h3>
+<p><code>moustafa2026finite</code> · status <strong>P</strong> · evidence <strong>AB</strong></p>
+<ul>
+<li><strong>Method:</strong> Finite-trace cellular sheaf with affine restriction maps for hybrid and networked executions with partial and non-simultaneous data; convex best-section estimator; per-cell residual scores localise model inconsistency; demonstrated on a DC microgrid and a linearised drone pose graph (corrupted-observation localisation).</li>
+<li><strong>Relation to RA-SCM:</strong> Non-learned sheaf fault localisation with affine maps; no packet-loss or AoI model.</li>
+</ul>
+<h3 id="foundational-and-context-sources-round-2">Foundational and context sources (round 2)</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Key</th>
+<th>Work</th>
+<th>Status / evidence</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>kaul2012realtime</code></td>
+<td>Kaul, Yates &amp; Gruteser 2012, Real-time status: how often should one update?, IEEE INFOCOM</td>
+<td>P / AB</td>
+<td>definition of age of information</td>
+</tr>
+<tr class="even">
+<td><code>sinopoli2004kalman</code></td>
+<td>Sinopoli et al. 2004, Kalman filtering with intermittent observations, IEEE TAC 49(9)</td>
+<td>P / AB</td>
+<td>lost packets as intermittent observations</td>
+</tr>
+<tr class="odd">
+<td><code>julier1997nondivergent</code></td>
+<td>Julier &amp; Uhlmann 1997, covariance intersection, ACC</td>
+<td>P / AB</td>
+<td>fusion under unknown correlation (no detection)</td>
+</tr>
+<tr class="even">
+<td><code>willsky1976survey</code></td>
+<td>Willsky 1976, failure detection in dynamic systems, Automatica 12(6)</td>
+<td>P / AB</td>
+<td>residual-based fault detection</td>
+</tr>
+<tr class="odd">
+<td><code>brown1992baseline</code></td>
+<td>Brown 1992, a baseline GPS RAIM scheme, Navigation 39(3)</td>
+<td>P / AB</td>
+<td>GPS integrity monitoring</td>
+</tr>
+<tr class="even">
+<td><code>kerns2014unmanned</code></td>
+<td>Kerns et al. 2014, UAV capture via GPS spoofing, J. Field Robotics 31(4)</td>
+<td>P / AB</td>
+<td>field evidence of UAV spoofing</td>
+</tr>
+<tr class="odd">
+<td><code>tippenhauer2011requirements</code></td>
+<td>Tippenhauer et al. 2011, requirements for GPS spoofing attacks, ACM CCS</td>
+<td>P / AB</td>
+<td>spoofing several receivers</td>
+</tr>
+<tr class="even">
+<td><code>hayat2016survey</code></td>
+<td>Hayat, Yanmaz &amp; Muzaffar 2016, UAV networks survey, IEEE COMST 18(4)</td>
+<td>P / AB</td>
+<td>intermittent UAV links</td>
+</tr>
+<tr class="odd">
+<td><code>gilbert1960capacity</code></td>
+<td>Gilbert 1960, capacity of a burst-noise channel, Bell Syst. Tech. J. 39(5)</td>
+<td>P / AB</td>
+<td>Gilbert–Elliott burst-loss model (round 1)</td>
+</tr>
+<tr class="even">
+<td><code>elliott1963estimates</code></td>
+<td>Elliott 1963, error rates on burst-noise channels, Bell Syst. Tech. J. 42(5)</td>
+<td>P / AB</td>
+<td>Gilbert–Elliott burst-loss model (round 1)</td>
+</tr>
+</tbody>
+</table>
+<div class="pagebreak">
+
+</div>
+<h2 id="s3.-critical-synthesis-gap-verification-and-originality-ledger">S3. Critical synthesis, gap verification and originality ledger</h2>
+<p><em>Established findings are separated from the project’s interpretations. “Interpretation” paragraphs are our reading, not results of the cited papers.</em></p>
+<h3 id="what-the-literature-establishes">1. What the literature establishes</h3>
+<ol type="1">
+<li><p><strong>Sheaf learning.</strong> Replacing the graph Laplacian by a sheaf Laplacian generalises diffusion: hand-built sheaves beat GCN on synthetic signed graphs (Hansen &amp; Gebhart 2020), and maps learned from node features are competitive on heterophilic node classification and control oversmoothing in theory (Bodnar et al. 2022). Whether restriction maps must be <em>learned</em> is contested: by the authors’ conclusion, computed orthogonal maps match or beat learned ones on most datasets, though they trail on Squirrel and Chameleon (Barbero et al. 2022, Table 1 and Sec. 5).</p></li>
+<li><p><strong>Sheaves for sensor consistency (non-learned).</strong> Robinson (2017) and Joslyn et al. (2020) use sheaf-valued sensor data, a consistency radius and a consistency filtration to <em>flag</em> disagreement between heterogeneous sensors. Joslyn et al. attribute disagreement to sensors with a consistency filtration but state that neither radius nor filtration says which measurements are trustworthy. Hernández &amp; Sánchez-Soto (2026, full text) propose the sheaf Dirichlet energy as an anomaly score with faulty-node localisation, without experiments; Moustafa &amp; Abdelghany (2026) localise corrupted observations with finite-trace sheaves.</p></li>
+<li><p><strong>Sheaves for multi-agent control.</strong> Hanks et al. (2025) solve consensus/formation/flocking with nonlinear sheaf Laplacians and ADMM under a fixed topology, without packet loss or fault detection.</p></li>
+<li><p><strong>Sheaves + time.</strong> Temporal sheaf networks exist for link prediction (Asif et al. 2026, preprint).</p></li>
+<li><p><strong>GNN-based swarm spoofing detection.</strong> Dang et al. (2023) use GCN+GRU on the GPS-vs-communication topology (simulation, accuracy-based). Model-based swarm detectors use reported positions plus pairwise ranging (Mykytyn et al. 2023, thresholds, no results in the version read; Bi et al. 2024, semidefinite feasibility, simulation).</p></li>
+<li><p><strong>GNNs and missing data.</strong> Graph imputation handles missing sensor values (Cini et al. 2022); uncertainty-weighted (variance-based) attention exists as a defence against adversarially corrupted graphs, not missing data (Zhu et al. 2019); graph anomaly detectors for sensors assume complete synchronous observations (Deng &amp; Hooi 2021).</p></li>
+<li><p><strong>Classical and recent cooperative localisation (round 2).</strong> Failed links, packet loss and AoI are handled <em>together with</em> faulty or attacked measurements by robust estimation: M-estimation with motion-model propagation (He et al. 2024), an innovation gate under jamming (Kargar Tasooji &amp; Parasuraman 2025), learned confidence with fault isolation (Ou et al. 2023), an AoI × covariance × link-quality score (Cao et al. 2026). They are scored by localisation error, not as detectors. Model-based swarm detectors (Chen et al. 2022; Michieletto et al. 2023; Vijay et al. 2025) assume delivered data. Learned graph swarm spoofing detectors have been simulated with delay and bursty loss (Tariq et al. 2026; Tariq &amp; Shaukat 2026) but without loss as a controlled factor or a physics-only arm.</p></li>
+</ol>
+<h3 id="contradictions-methodological-differences-transfer-risks">2. Contradictions, methodological differences, transfer risks</h3>
+<ul>
+<li><strong>Learned vs computed maps</strong> (Bodnar vs Barbero): different evidence about whether learning the sheaf is necessary; both on node-classification benchmarks. <em>Interpretation:</em> for a swarm the maps are partly <em>known physics</em>, so the question moves from “learn or compute” to “which part of the map is known”.</li>
+<li><strong>What counts as independent evidence differs across swarm papers:</strong> UWB ranging (Mykytyn), pairwise range measurements (Bi), communication path loss (Dang). Dang et al. treat the communication topology as a trustworthy reference; Bi et al. assume reports and measurements arrive. <em>Interpretation:</em> none of the three treats communication unreliability as a confounder of the inconsistency signal.</li>
+<li><strong>Metrics are not comparable:</strong> accuracy (Dang), detection success rate (Bi), none (Mykytyn), F1 under a threshold protocol (Deng &amp; Hooi). None reports precision–recall area or false-positive behaviour under loss.</li>
+<li><strong>Benchmark transfer:</strong> sheaf results concern heterophily/oversmoothing in node classification; they do not show an advantage for detecting local inconsistencies on a physically constrained swarm graph. This is an assumption we must test, not a transferable result.</li>
+<li><strong>Data limitations:</strong> almost all UAV-swarm evidence in the retrieved set is simulation-only (exceptions: mixed-reality Crazyflie flights in Vijay et al. 2025, a three-UAV pilot in Tariq &amp; Shaukat 2026); Joslyn et al.’s field study is the only real-data sheaf application and is a small case study.</li>
+<li><strong>Reproducibility:</strong> only Park &amp; Yoo (2026) state released code in the sections read (not systematically checked); Mykytyn et al. report no experimental numbers at all in the version read.</li>
+</ul>
+<h3 id="gap-verification-questions-from-the-project-brief">3. Gap verification (questions from the project brief)</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Question</th>
+<th>Finding (within the search coverage declared in S1)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Has reliability-aware sheaf modelling been studied for this task?</td>
+<td>No such study was found: four gap-check queries (sheaf+anomaly detection; sheaf+cooperative localisation; sheaf+false-data-injection; sheaf+reliability/packet loss) returned no matching paper. The 2026 preprint arXiv:2606.19529 was read in full in round 2: it proposes a sheaf Dirichlet-energy anomaly score with faulty-node localisation, without experiments or a loss model.</td>
+</tr>
+<tr class="even">
+<td>Do comparable GNN methods already incorporate communication reliability?</td>
+<td>Partly in other forms: variance/uncertainty-weighted aggregation (Zhu et al.), attention weights (GAT), imputation for missing values (GRIN). Model-based cooperative localisation does use AoI, packet loss and link quality as weights (Cao et al. 2026; He et al. 2024; Kargar Tasooji &amp; Parasuraman 2025), and learned swarm detectors have been simulated under loss (Tariq et al. 2026; Tariq &amp; Shaukat 2026); none uses link metadata in a detector evaluated with loss as a controlled factor against an age-aware physics test.</td>
+</tr>
+<tr class="odd">
+<td>Are there simpler approaches that address the same problem?</td>
+<td>Yes — a statistical consistency test that inflates residual variance with the age of the last report (an <em>age-aware physics detector</em>). This is implemented here as the strongest simple competitor. Classical cooperative-localisation fault tolerance (covariance intersection/union, robust M-estimation, innovation gates; reviewed in round 2) is another family, <strong>not</strong> implemented.</td>
+</tr>
+<tr class="even">
+<td>Could the apparent gap come from incomplete coverage?</td>
+<td>Yes, but less so after round 2: IEEE/ACM records were searched through Crossref, OpenAlex and Semantic Scholar, not through the native interfaces. The gap is therefore stated as “not found”, not “does not exist”.</td>
+</tr>
+<tr class="odd">
+<td>Does sheaf modelling give a plausible theoretical advantage?</td>
+<td>Plausible, not demonstrated: (i) geometric consistency of reported vs measured relative position is naturally an edge-wise comparison in a shared edge space; (ii) node-specific restriction maps can absorb formation rotation/scale differences; (iii) a weighted sheaf Laplacian offers a principled place for precision weights. Against it: a physics test already implements (i) exactly, and generic edge-conditioned message passing can learn (i)–(iii) without sheaf structure.</td>
+</tr>
+<tr class="even">
+<td>When might it give no improvement?</td>
+<td>If the age-aware physics detector is near-optimal (then learned models cannot add information); if restriction maps collapse to identity (then RA-SCM = edge-conditioned MPNN); if packet loss only affects data that the temporal model already carries; if anomalies are fully common-mode (unobservable).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="gap-statement-revised-after-round-2-evidence-supported">4. Gap statement (revised after round 2, evidence-supported)</h3>
+<blockquote>
+<p>Model-based cooperative localisation already tolerates failed links, packet loss and AoI together with faulty measurements, and learned graph detectors of swarm spoofing have been run in simulators that include packet loss. Within the sources we could access, however, no study reports how detectors of UAV position anomalies, learned graph- or sheaf-based ones in particular, built on the consistency of reported positions with inter-UAV relative measurements, perform when <strong>iid loss, burst loss and AoI are controlled and results are stratified by condition</strong>, compared against <strong>a standalone age-aware physical-consistency baseline</strong>.</p>
+</blockquote>
+<p>The round-1 supporting sentences “existing swarm detectors assume reliable delivery” and “existing sheaf work does not address anomaly detection or lossy links” were <strong>withdrawn</strong>: they are contradicted by the round-2 sources listed in item 7 and by Hernández &amp; Sánchez-Soto (2026). Because the question is empirical, the contribution is framed as a <em>controlled test of a hypothesis</em>, including the possibility that the answer is negative.</p>
+<h3 id="originality-ledger">5. Originality ledger</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Component</th>
+<th>Origin</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Cellular sheaf, sheaf Laplacian, restriction maps</td>
+<td><strong>Taken</strong> from literature (Hansen &amp; Ghrist 2019; Hansen &amp; Gebhart 2020)</td>
+</tr>
+<tr class="even">
+<td>Learning restriction maps from endpoint node states, diffusion layer form</td>
+<td><strong>Taken/adapted</strong> from NSD (Bodnar et al. 2022); dense implementation, own code</td>
+</tr>
+<tr class="odd">
+<td>GCN, GAT layers</td>
+<td><strong>Taken</strong> (Kipf &amp; Welling; Veličković et al.), dense re-implementations cross-checked against PyG in unit tests</td>
+</tr>
+<tr class="even">
+<td>Weighting messages by uncertainty</td>
+<td><strong>Taken</strong> as an idea (Zhu et al. 2019; classical precision weighting) — <em>not claimed as new</em></td>
+</tr>
+<tr class="odd">
+<td>Gilbert–Elliott loss, age-of-information staleness, constant-velocity compensation</td>
+<td><strong>Taken</strong> (Gilbert 1960; Elliott 1963; standard kinematics)</td>
+</tr>
+<tr class="even">
+<td>Consistency of reported vs measured relative position as the inconsistency measure</td>
+<td><strong>Taken</strong> from swarm fault/spoofing work (Chen et al. 2022 edge χ² tests; Mykytyn et al.; Bi et al.) and sheaf sensor consistency (Robinson; Joslyn et al.)</td>
+</tr>
+<tr class="odd">
+<td>Delayed-message semantics: every layer reads <em>cached sender embeddings from the time of the last delivered packet</em>, applied identically to all models</td>
+<td><strong>Adapted</strong> from the delayed information structure of decentralised GNN controllers (Tolstaya et al. 2020: k-hop information is k steps old), extended to lost packets</td>
+</tr>
+<tr class="even">
+<td>Affine (data-dependent translation) restriction: ρ = F_i x_i − F_j x_j − b_ij, b_ij a second output head of Φ, equivalent to a sheaf on stalks augmented with f constant coordinates</td>
+<td><strong>Adapted</strong> (affine maps are also used, non-learned, by Moustafa &amp; Abdelghany 2026)</td>
+</tr>
+<tr class="odd">
+<td>Receiver-specific reliability weights learned from delivery flag, age and link quality, plus an evidence-mass feature, inside sheaf-style diffusion</td>
+<td><strong>Combined in a new manner</strong> (AoI/link-quality weighting is known from estimation, Cao et al. 2026; the learned combination with sheaf-style diffusion for detection was not found). The implemented layer is receiver-centric and equals a weighted sheaf Laplacian only for symmetric maps and weights</td>
+</tr>
+<tr class="even">
+<td>Experimental protocol: loss/burst/targeted-blackout as a controlled confound, frozen operating point, paired seeds, age-aware physics control, ablation separating edge-conditioning / sheaf maps / weights / reliability channel / temporal memory</td>
+<td><strong>Proposed</strong> as the genuinely new element (a protocol contribution, not an algorithmic one). Individual elements exist elsewhere (modelled loss and paired seeds in Tariq et al. 2026); their combination was not found in the sources searched</td>
+</tr>
+</tbody>
+</table>
+<p>No component is presented as a new mathematical invention.</p>
+</body>
+</html>

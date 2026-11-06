@@ -13,10 +13,17 @@ sys.path.insert(0, str(HERE))
 import fill  # noqa: E402  (numbers come from results/tables, never typed by hand)
 md = fill.fill(md)
 (HERE / "report.md").write_text(md)
-common = ["pandoc", str(HERE / "report.md"), "--from", "markdown+tex_math_dollars+pipe_tables+smart", "--citeproc",
+# --columns 1000: no fixed <colgroup> widths, so the browser sizes table columns to their content
+common = ["pandoc", str(HERE / "report.md"), "--from", "markdown+tex_math_dollars+pipe_tables+smart", "--columns", "1000", "--citeproc",
           "--bibliography", str(HERE / "references.bib"), "--resource-path", str(HERE)]
-subprocess.run(common + ["--standalone", "--mathml", "--css", "report.css", "--metadata", "pagetitle=RA-SCM report",
+TITLE = "Reliability-Aware Sheaf Consistency for Distinguishing UAV Position Anomalies from Communication Failures"
+# MathJax (pinned) instead of MathML: Chrome's MathML ignores upright operator names and misplaces accents
+subprocess.run(common + ["--standalone", "--mathjax=https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml-full.js",
+                         "--css", "report.css", "--metadata", f"pagetitle={TITLE}",
                          "-o", str(HERE / "report.html")], check=True)
+# pandoc joins "et al." to the year with a no-break space, which Charter prints at double width
+html = HERE / "report.html"
+html.write_text(html.read_text().replace("al.\u00a0", "al. "))
 subprocess.run(common + ["-o", str(HERE / "report.docx")], check=True)
 if Path(CHROME).exists():
     subprocess.run([CHROME, "--headless=new", "--disable-gpu", "--no-pdf-header-footer", "--virtual-time-budget=20000",

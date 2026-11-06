@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>RA-SCM report</title>
+  <title>Reliability-Aware Sheaf Consistency for Distinguishing UAV Position Anomalies from Communication Failures</title>
   <style>
     code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
@@ -33,6 +33,7 @@
     }
   </style>
   <link rel="stylesheet" href="report.css" />
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml-full.js" type="text/javascript"></script>
   <!--[if lt IE 9]>
     <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
   <![endif]-->
@@ -42,104 +43,179 @@
 <h1 class="title">Reliability-Aware Sheaf Consistency for Distinguishing UAV Position Anomalies from Communication Failures: A Falsifiable Simulation Study</h1>
 </header>
 <p class="author">
-Mehmet Ünlü (040230253) · unlu23@itu.edu.tr · Istanbul Technical University, Electronics and Communication Engineering · EHB 420E Artificial Neural Networks · HW1 – From Curiosity to Scientific Discovery · 30 October 2026
+Mehmet Ünlü (040230253) · unlu23@itu.edu.tr · Istanbul Technical University, Electronics and Communication Engineering · EHB 420E Artificial Neural Networks · HW1 – From Curiosity to Scientific Discovery · 6 November 2026
+</p>
+<p class="subtitle-note">
+Supplementary material (separate PDF): literature matrix, search log, gap analysis. Code, data and dashboard: https://github.com/unlumehmet30/uav-sheaf-research
 </p>
 <div class="abstract">
 <p>
-<strong>Abstract.</strong> A UAV swarm must tell a genuinely wrong position report from a merely stale one, because packet loss and localisation faults both create inconsistencies between reported and measured relative positions. In 20 verified sources we found no study that evaluates learned graph or sheaf-based position-anomaly detectors under explicitly modelled loss, burst loss and age of information against an age-aware physical-consistency baseline (search coverage is limited: IEEE Xplore and ACM DL were not queried natively). We propose RA-SCM, a sheaf-diffusion detector whose messages are read from the time of the last delivered packet, with edge-conditioned restriction maps, an affine translation term and reliability weights derived from delivery state, age and link quality, and we test whether it outperforms capacity-matched GCN, GAT and neural-sheaf baselines. A lightweight simulator with sudden, drift and spoof-like anomalies, iid, Gilbert–Elliott and targeted communication failures, leakage tests and five seeds supplies the evidence; nothing is validated on real flights. RA-SCM has the highest mean PR-AUC in most loss conditions (0.975 at 50% iid loss, 0.967 at 50% bursts) and clearly beats an age-aware physics test, but under the pre-specified rule the hypothesis is not supported: its margin over the best conventional GNN reaches 0.02 only under 50% bursts (+0.028 [+0.013, +0.043]) and is absent without loss. Ablations attribute the gain to the communication-reliability inputs rather than to learned sheaf maps. A consistency test that ignores staleness collapses to 0.519 under bursts. The contribution is a falsifiable benchmark and a negative-leaning answer.
+<strong>Abstract.</strong> A UAV swarm must tell a wrong position report from a merely stale one, because packet loss and localisation faults both create inconsistencies between reported and measured relative positions. Cooperative localisation tolerates lost links and faulty measurements jointly, and learned swarm detectors have been simulated with packet loss, but in the literature we searched none compares detectors of UAV position anomalies under controlled, condition-stratified loss, burst loss and age of information against an age-aware physical-consistency baseline. We propose RA-SCM (Reliability-Aware Sheaf Consistency Model), a sheaf-diffusion detector whose messages are read from the time of the last delivered packet, with edge-conditioned restriction maps and reliability weights derived from delivery state, age and link quality. We hypothesise that it beats the best capacity-matched GCN, GAT or neural-sheaf baseline by at least 0.02 PR-AUC (area under the precision–recall curve) in four of six loss conditions. A simulator with sudden, drift and spoof-like anomalies, iid, Gilbert–Elliott and targeted communication failures, leakage tests and five seeds supplies the evidence; nothing is validated on real flights. RA-SCM has the highest mean PR-AUC in all seven main conditions (0.975 at 50% iid loss, 0.967 at 50% bursts) and beats an age-aware physics test, but the hypothesis is not supported: its margin over the best conventional GNN reaches 0.02 only under 50% bursts (+0.028 [+0.013, +0.043], 95% CI) and is absent without loss. Ablations attribute the gain to the reliability inputs, not to learned sheaf maps. The contribution is a falsifiable benchmark and a negative-leaning answer.
 </p>
 </div>
 <h2 id="introduction-and-motivation">1. Introduction and motivation</h2>
-<p>A cooperative UAV swarm keeps its formation by exchanging position estimates and comparing them with local relative measurements. Two very different failures disturb this exchange in a similar way. A <em>localisation failure</em> (GNSS spoofing, drift, a jump in the position filter) makes a UAV report a wrong position. A <em>communication failure</em> (packet loss, bursts, link blockage) makes the receivers work with old reports. In both cases a receiver that compares a neighbour’s last report with its own relative measurement sees a discrepancy. If a link outage is read as an attack, the swarm raises false alarms and may break formation unnecessarily; if an attack is read as a link problem, the attack goes unnoticed. The problem matters to operators of inspection, agriculture and search-and-rescue swarms, and to the safety and security community that must certify such systems.</p>
-<p>We became interested while comparing swarm spoofing detectors: they use communication or ranging as independent evidence, but none of those we reviewed treats that evidence as unreliable (Section 3). Neural sheaf diffusion expresses edge-wise consistency naturally <span class="citation" data-cites="bodnar2022neural">(Bodnar et al. 2022)</span>, so we ask whether a <em>reliability-aware</em> sheaf model helps or a simpler statistical test suffices, and design the experiment so that it can fail.</p>
+<p>A cooperative UAV swarm keeps its formation by exchanging position estimates and comparing them with local relative measurements. Two very different failures disturb this exchange in a similar way. A <em>localisation failure</em> (GNSS spoofing, drift, a jump in the position filter) makes a UAV report a wrong position; a <em>communication failure</em> (packet loss, bursts, link blockage) makes the receivers work with old reports. In both cases a receiver that compares a neighbour’s last report with its own relative measurement sees a discrepancy. If an outage is read as an attack, the swarm raises false alarms and may break formation unnecessarily; if an attack is read as a link problem, it goes unnoticed. This matters to operators of inspection and search-and-rescue swarms and to those who certify them.</p>
+<p>We became interested while comparing swarm spoofing detectors: they use communication or ranging as independent evidence, and those we reviewed assume that it arrives, treat the channel itself as a trusted reference, or include loss in the simulator without testing whether it is mistaken for an attack (Section 3). Neural sheaf diffusion (NSD) expresses edge-wise consistency naturally <span class="citation" data-cites="bodnar2022neural">(Bodnar et al. 2022)</span>, so we ask whether a reliability-aware sheaf model, the Reliability-Aware Sheaf Consistency Model (RA-SCM), helps or a simpler statistical test suffices, and design the experiment so that it can fail.</p>
 <h2 id="problem-statement-and-supporting-evidence">2. Problem statement and supporting evidence</h2>
-<p><strong>Setting.</strong> UAVs <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>=</mo><mn>1</mn><mi>.</mi><mi>.</mi><mi>N</mi></mrow><annotation encoding="application/x-tex">i=1..N</annotation></semantics></math> move in the plane. UAV <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math> has a real state <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>p</mi><mi>i</mi></msub><mo>,</mo><msub><mi>v</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(p_i, v_i)</annotation></semantics></math>, an onboard <em>measured</em> position <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>p</mi><mo accent="true">̃</mo></mover><mi>i</mi></msub><mo>=</mo><msub><mi>p</mi><mi>i</mi></msub><mo>+</mo><msub><mi>w</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\tilde p_i = p_i + w_i</annotation></semantics></math>, and broadcasts a <em>reported</em> position <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>p</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo>=</mo><msub><mover><mi>p</mi><mo accent="true">̃</mo></mover><mi>i</mi></msub><mo>+</mo><msub><mi>o</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat p_i = \tilde p_i + o_i(t)</annotation></semantics></math>, where <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>o</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">o_i(t)</annotation></semantics></math> is an anomaly offset (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>o</mi><mi>i</mi></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">o_i=0</annotation></semantics></math> in normal operation). An IMU supplies a velocity estimate <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>v</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><annotation encoding="application/x-tex">\hat v_i</annotation></semantics></math> independent of the position channel, and a relative sensor gives <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>r</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><msub><mi>p</mi><mi>j</mi></msub><mo>−</mo><msub><mi>p</mi><mi>i</mi></msub><mo>+</mo><msub><mi>n</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">r_{ij} = p_j - p_i + n_{ij}</annotation></semantics></math> for neighbours within range. Packets from <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math> reach <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math> with an indicator <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>m</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">m_{ij}(t)\in\{0,1\}</annotation></semantics></math>; let <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">a_{ij}(t)</annotation></semantics></math> be the number of steps since the last delivery. <strong>Task:</strong> output for each UAV and step a score for the event <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="postfix">∥</mo><msub><mi>o</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">∥</mo><mo>≥</mo><mi>δ</mi></mrow><annotation encoding="application/x-tex">\|o_i(t)\|\ge\delta</annotation></semantics></math>, using only information a UAV could have received.</p>
-<p><strong>Evidence that the problem exists.</strong> (i) GNSS spoofing of swarms is an acknowledged threat: civil GPS signals are unauthenticated <span class="citation" data-cites="mykytyn2023gps dang2023graphic">(Mykytyn et al. 2023; Dang, Karakoc, and Jäntti 2023)</span>, and swarm detectors based on reported positions plus distances have been proposed <span class="citation" data-cites="bi2024detection">(Bi et al. 2024)</span>. (ii) Swarm communication is affected by the environment <span class="citation" data-cites="dang2023graphic">(Dang, Karakoc, and Jäntti 2023)</span>. (iii) In our own simulation (Section 9) a consistency test that treats the last received report as current falls from 0.894 PR-AUC without loss to 0.519 under 50% burst loss. Evidence (iii) is a simulation outcome, not field data.</p>
-<p><strong>Root cause or symptom?</strong> The root cause is a modelling assumption: the reviewed detectors treat delivery as reliable or the communication topology as trusted evidence, so <em>missing</em> and <em>wrong</em> information are not separated. It remains unsolved because the swarm evidence is mostly simulated without a controlled loss model (Table 1).</p>
+<p><strong>Setting.</strong> UAVs <span class="math inline">\(i=1,\dots,N\)</span> move in the plane. UAV <span class="math inline">\(i\)</span> has a real state <span class="math inline">\((p_i, v_i)\)</span>, a <em>measured</em> position <span class="math inline">\(\tilde p_i = p_i + w_i\)</span>, and broadcasts a <em>reported</em> position <span class="math inline">\(\hat p_i = \tilde p_i + o_i(t)\)</span>, where <span class="math inline">\(o_i(t)\)</span> is an anomaly offset (0 in normal operation). An IMU supplies a velocity estimate <span class="math inline">\(\hat v_i\)</span>, and a relative sensor gives <span class="math inline">\(r_{ij} = p_j - p_i + n_{ij}\)</span> for neighbours within range. Packets from <span class="math inline">\(j\)</span> reach <span class="math inline">\(i\)</span> with an indicator <span class="math inline">\(m_{ij}(t)\in\{0,1\}\)</span>; <span class="math inline">\(a_{ij}(t)\)</span>, the number of steps since the last delivery, is the age of information (AoI) of the link <span class="citation" data-cites="kaul2012realtime">(Kaul, Yates, and Gruteser 2012)</span>. <strong>Task:</strong> output for each UAV and step a score for the event <span class="math inline">\(\lVert o_i(t)\rVert\ge\theta\)</span> (<span class="math inline">\(\theta=2\)</span> m), using only information a UAV could have received.</p>
+<p><strong>Evidence that the problem exists.</strong> (i) GNSS spoofing has captured a small UAV in a field test <span class="citation" data-cites="kerns2014unmanned">(Kerns et al. 2014)</span>, and spoofing several receivers at once, as in a swarm, has been analysed theoretically <span class="citation" data-cites="tippenhauer2011requirements">(Tippenhauer et al. 2011)</span>. (ii) UAV-to-UAV links are intermittent because of mobility, range and environment <span class="citation" data-cites="hayat2016survey dang2023graphic">(Hayat, Yanmaz, and Muzaffar 2016; Dang, Karakoc, and Jäntti 2023)</span>. (iii) In our simulation (Section 9) a consistency test that treats the last received report as current falls from 0.894 PR-AUC without loss to 0.519 under 50% burst loss (a simulation outcome, not field data). We found no public dataset that combines labelled position anomalies with logged packet loss, hence the simulation.</p>
+<p><strong>Root cause or symptom?</strong> The root cause is a modelling assumption at the <em>detection</em> stage: swarm detectors assume that reports and ranges arrive, trust the channel, or include loss without measuring its confounding effect, while estimators that handle lost or stale data down-weight or exclude it without deciding whether a report is wrong or merely stale (Section 3). It is unsolved because a stale and a wrong report produce similar residuals, so separating them needs explicit delivery metadata (Section 5); because most detectors were evaluated only in simulation and none with loss-stratified results (Table 1); and because no shared dataset exists.</p>
 <h2 id="critical-literature-review">3. Critical literature review</h2>
-<p><strong>Search protocol.</strong> Searches (27 October 2026) used a general web search tool, the arXiv and Crossref APIs and publisher pages (22 queries, <code>literature/search_log.md</code>); IEEE Xplore and ACM DL were <strong>not</strong> queried natively, only reached through DOIs. Keywords: <em>sheaf neural network / neural sheaf diffusion / sheaf Laplacian / restriction map</em> combined with <em>anomaly detection, GPS spoofing, UAV swarm, cooperative localization, packet loss, missing data, edge reliability</em>. <em>Included:</em> sheaf learning or sensor sheaves, GNN anomaly/spoofing detection, swarm position consistency, GNNs under missing or unreliable data; independently verifiable records; peer-reviewed papers or clearly labelled preprint/workshop papers. <em>Excluded:</em> patents, aggregator pages, unverifiable items, single-UAV radio-fingerprint or GNSS-authentication schemes, federated intrusion detection. Of the 22 verified references (20 in the matrix plus two loss-model papers), three UAV papers were read in key sections of the full text, the others at abstract level (plus background knowledge of GCN/GAT/NSD); the matrix (<code>literature/literature_matrix.md</code>) flags what to re-check.</p>
-<p><strong>Comparative analysis.</strong> <em>What is established.</em> Sheaf Laplacians generalise graph diffusion and, with learned restriction maps, handle heterophily and oversmoothing better than a trivial sheaf on node-classification benchmarks <span class="citation" data-cites="hansen2020sheaf bodnar2022neural">(Hansen and Gebhart 2020; Bodnar et al. 2022)</span>. <em>Contested point:</em> orthogonal maps <em>computed</em> from geometry match or beat learned maps on most of the authors’ benchmarks <span class="citation" data-cites="barbero2022connection">(Barbero et al. 2022)</span>, so whether maps must be learned is unsettled. <em>Sensor sheaves</em> offer a consistency radius <span class="citation" data-cites="robinson2017sheaves">(Robinson 2017)</span>; the one field study we found (12 GPS collars on bears) shows it flags disagreement but not <em>which</em> measurement is wrong <span class="citation" data-cites="joslyn2020sheaf">(Joslyn et al. 2020)</span>. Multi-agent sheaves address coordination under a fixed topology without losses or fault detection <span class="citation" data-cites="hanks2025distributed">(Hanks et al. 2025)</span>; temporal sheaves exist for link prediction <span class="citation" data-cites="asif2026temporal">(Asif, Khan, and Khan 2026)</span>. <em>Swarm spoofing detectors</em> use a GNN on GPS-versus-communication topology in simulation <span class="citation" data-cites="dang2023graphic">(Dang, Karakoc, and Jäntti 2023)</span>, ranging-versus-GPS thresholds without reported results in the version we read <span class="citation" data-cites="mykytyn2023gps">(Mykytyn et al. 2023)</span>, or a semidefinite feasibility test in simulation <span class="citation" data-cites="bi2024detection">(Bi et al. 2024)</span>. Dang et al. assume spoofing leaves communication unaffected and use path loss as trusted evidence; Bi et al. assume reports and ranges are available. <em>Missing data</em> is handled by graph imputation <span class="citation" data-cites="cini2022filling">(Cini, Marisca, and Alippi 2022)</span> and uncertainty-weighted aggregation <span class="citation" data-cites="zhu2019robust">(Zhu et al. 2019)</span>, but neither separates missing from corrupted values; graph anomaly detectors for sensors assume complete, synchronous observations <span class="citation" data-cites="deng2021graph">(Deng and Hooi 2021)</span>. Metrics are incomparable across these works (accuracy, success rate, F1, none); none reports precision–recall area or false alarms under controlled loss.</p>
+<p><strong>Search protocol.</strong> Round 1 (27 October 2026): a general web search tool, the arXiv and Crossref APIs and publisher pages (22 queries). Round 2 (6 November 2026): 24 structured queries over OpenAlex (14), Crossref restricted to IEEE and ACM records (5) and Semantic Scholar (5), from 2018 on (765 titles and 83 abstracts screened), plus reference chasing in cooperative localisation; IEEE Xplore and ACM DL themselves were not queried. Keywords: <em>sheaf neural network / sheaf Laplacian / graph neural network</em> × <em>anomaly or fault detection, GNSS spoofing, UAV swarm, cooperative localization, packet loss, age of information, missing data</em>. <em>Included:</em> sheaf learning, sensor sheaves, GNN anomaly/spoofing detection, swarm consistency and cooperative localisation under faults or lossy links, GNNs under missing data; verifiable, peer-reviewed or labelled preprints. <em>Excluded:</em> patents, aggregators, network intrusion detection, single-UAV GNSS authentication, unreviewed low-visibility items. Of 43 references, key sections of 19 were read in full text, the rest at abstract level (per-paper evidence level in the supplementary literature matrix).</p>
+<p><strong>Sheaf learning.</strong> Sheaf Laplacians generalise graph diffusion: hand-built sheaves beat GCN on synthetic signed graphs <span class="citation" data-cites="hansen2020sheaf">(Hansen and Gebhart 2020)</span>, and maps learned from node features are competitive on heterophilic node classification and provably control oversmoothing better than a trivial sheaf <span class="citation" data-cites="bodnar2022neural">(Bodnar et al. 2022)</span>. <em>Contested:</em> by the authors’ account, maps <em>computed</em> from geometry match or beat learned ones on most of nine benchmarks but trail them on the dense Squirrel and Chameleon graphs (and slightly on Cora) <span class="citation" data-cites="barbero2022connection">(Barbero et al. 2022)</span>. Nonlinear <span class="citation" data-cites="zaghen2024nonlinear">(Zaghen et al. 2024)</span>, directed <span class="citation" data-cites="ribeiro2025cooperative">(Ribeiro et al. 2026)</span> and temporal <span class="citation" data-cites="asif2026temporal">(Asif, Khan, and Khan 2026)</span> variants target classification or link prediction.</p>
+<p><strong>Sheaves for consistency and faults.</strong> Sensor sheaves measure disagreement <span class="citation" data-cites="robinson2017sheaves">(Robinson 2017)</span>. In a field study (six sessions with decoy collars, six with GPS collars on three black bears) a consistency filtration attributes disagreement to sensors, but the authors note that neither it nor the radius says which measurements are trustworthy, and staleness is not modelled <span class="citation" data-cites="joslyn2020sheaf">(Joslyn et al. 2020)</span>. A conceptual preprint proposes the sheaf Dirichlet energy as an anomaly score that localises a faulty node and names packet loss as a challenge, without experiments <span class="citation" data-cites="hernandez2026sheaf">(Hernández and Sánchez-Soto 2026)</span>; finite-trace sheaves with affine maps localise a corrupted observation on a drone pose graph <span class="citation" data-cites="moustafa2026finite">(Moustafa and Abdelghany 2026)</span>; sheaf coordination assumes a fixed, lossless topology <span class="citation" data-cites="hanks2025distributed">(Hanks et al. 2025)</span>. None is learned or evaluated under modelled loss.</p>
+<p><strong>Swarm position-fault and spoofing detectors</strong> compare reported positions with ranges: thresholds without reported detection rates <span class="citation" data-cites="mykytyn2023gps">(Mykytyn et al. 2023)</span>, a semidefinite feasibility test <span class="citation" data-cites="bi2024detection">(Bi et al. 2024)</span>, <span class="math inline">\(\chi^2\)</span> edge tests with faulty-vertex identification <span class="citation" data-cites="chen2022cooperative">(Chen et al. 2022)</span>, multimodal consistency <span class="citation" data-cites="michieletto2023robust">(Michieletto et al. 2023)</span>, and range-based integrity monitoring, demonstrated in mixed-reality flights with real Crazyflies, that assumes synchronous communication <span class="citation" data-cites="vijay2025range">(Vijay et al. 2025)</span>. Learned ones use a GCN+GRU on GPS-versus-communication topology, assuming spoofing leaves the channel unaffected and using path loss as reference <span class="citation" data-cites="dang2023graphic">(Dang, Karakoc, and Jäntti 2023)</span>, a graph-attention VAE on ranging sequences <span class="citation" data-cites="pan2026satellite">(Pan et al. 2026)</span>, or a zero-trust GAT in which bandwidth is a constraint and packet delivery an outcome, not a confounder <span class="citation" data-cites="sophia2026zerotrust">(Sophia et al. 2026)</span>. The closest are two learned spoofing detectors combining Kalman residuals with GNNs, run in simulators with delay and bursty loss (Gilbert–Elliott in one, freshness gating in the other) and compared with paired <span class="math inline">\(t\)</span>-tests; neither reports loss-stratified results or a physics-only arm, and one avoids inter-UAV ranging <span class="citation" data-cites="tariq2026tristream tariq2026mission">(Tariq, Ahanger, and Shaukat 2026; Tariq and Shaukat 2026)</span>. No relative-only detector can see a rigid common-mode shift of the swarm <span class="citation" data-cites="park2026rigid">(Park and Yoo 2026)</span>.</p>
+<p><strong>Estimation with lost, stale or faulty data.</strong> Lost packets are intermittent observations <span class="citation" data-cites="sinopoli2004kalman">(Sinopoli et al. 2004)</span>, estimates with unknown correlation are fused by covariance intersection <span class="citation" data-cites="julier1997nondivergent">(Julier and Uhlmann 1997)</span>, and residual tests detect faulty measurements <span class="citation" data-cites="willsky1976survey brown1992baseline">(Willsky 1976; Brown 1992)</span>. Recent cooperative localisation handles failed links and faulty measurements <em>together</em>: M-estimation with motion-model propagation <span class="citation" data-cites="he2024robust">(He, Shan, and Huang 2024)</span>, an innovation gate under jamming <span class="citation" data-cites="kargartasooji2025distributed">(Kargar Tasooji and Parasuraman 2025)</span>, learned confidence with fault isolation <span class="citation" data-cites="ou2023fpecmv">(Ou, Liang, and Lam 2023)</span>, and a neighbour quality score combining AoI, covariance and packet loss <span class="citation" data-cites="cao2026quality">(Cao et al. 2026)</span>. They down-weight or exclude data and are scored by localisation error; none decides whether a report is <em>wrong</em> or merely <em>stale</em>. In graph learning, imputation fills <em>missing</em> values <span class="citation" data-cites="cini2022filling">(Cini, Marisca, and Alippi 2022)</span> and variance-based attention resists <em>adversarially corrupted</em> graphs <span class="citation" data-cites="zhu2019robust">(Zhu et al. 2019)</span>; neither separates the two. GDN forecasts sensors from a complete, synchronous window <span class="citation" data-cites="deng2021graph">(Deng and Hooi 2021)</span>; decentralised GNN controllers read <span class="math inline">\(k\)</span>-hop data <span class="math inline">\(k\)</span> steps late but model no loss <span class="citation" data-cites="tolstaya2020learning">(Tolstaya et al. 2020)</span>.</p>
+<p><strong>Contradictions, metrics, reproducibility.</strong> Whether maps must be learned is contested; the independent evidence differs (ranging, path loss, inertia). Metrics are incomparable (accuracy, success rate, localisation error, F1, none); no detector reports precision–recall area or false alarms under controlled loss. In the sections read, only one UAV paper states released code <span class="citation" data-cites="park2026rigid">(Park and Yoo 2026)</span> (not systematically checked), and most use their own simulators. <strong>Transfer risk:</strong> sheaf gains concern node classification, not local inconsistency detection on a time-varying swarm graph.</p>
 <table>
-<colgroup>
-<col style="width: 25%" />
-<col style="width: 25%" />
-<col style="width: 25%" />
-<col style="width: 25%" />
-</colgroup>
 <thead>
 <tr class="header">
 <th>Work</th>
-<th>Setting / evidence</th>
-<th>Models unreliable delivery?</th>
-<th>Learned</th>
+<th>Approach; evidence</th>
+<th>Metric (result)</th>
+<th>Unreliable delivery</th>
+<th>Limitation here</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Hansen &amp; Gebhart 2020; Bodnar et al. 2022; Barbero et al. 2022</td>
-<td>sheaf diffusion, node classification</td>
+<td>Bodnar et al. 2022</td>
+<td>NSD, learned maps; 9 node-classification benchmarks</td>
+<td>accuracy (1st on 5 of 6 heterophilic)</td>
 <td>no</td>
-<td>learned / computed maps</td>
+<td>static graph, no edge features</td>
 </tr>
 <tr class="even">
-<td>Robinson 2017; Joslyn et al. 2020; Hanks et al. 2025</td>
-<td>sensor sheaves (small field case); sheaf multi-agent control (3 simulated vehicles)</td>
-<td>no (fixed topology)</td>
+<td>Barbero et al. 2022 (W)</td>
+<td>maps computed from geometry; same benchmarks</td>
+<td>accuracy (≈ learned on most)</td>
 <td>no</td>
+<td>manifold assumption</td>
 </tr>
 <tr class="odd">
-<td>Asif et al. 2026 (preprint)</td>
-<td>temporal sheaf, link prediction</td>
+<td>Joslyn et al. 2020</td>
+<td>consistency radius and filtration; GPS-collar field study</td>
+<td>radius (m)</td>
 <td>no</td>
-<td>yes</td>
+<td>missing vs wrong not separated</td>
 </tr>
 <tr class="even">
+<td>Hernández &amp; Sánchez-Soto 2026 (X)</td>
+<td>Dirichlet energy as anomaly score; conceptual</td>
+<td>none</td>
+<td>named only</td>
+<td>no evaluation</td>
+</tr>
+<tr class="odd">
+<td>Moustafa &amp; Abdelghany 2026</td>
+<td>finite-trace sheaf, affine maps; drone pose graph</td>
+<td>residual localisation</td>
+<td>non-simultaneous data</td>
+<td>not learned, no loss model</td>
+</tr>
+<tr class="even">
+<td>Dang et al. 2023</td>
+<td>GCN+GRU, GPS vs channel topology; simulation</td>
+<td>accuracy (&gt;90%)</td>
+<td>no (channel is reference)</td>
+<td>no class-balanced metric</td>
+</tr>
+<tr class="odd">
+<td>Bi et al. 2024</td>
+<td>semidefinite feasibility; simulation</td>
+<td>success rate</td>
+<td>no</td>
+<td>snapshot, all data received</td>
+</tr>
+<tr class="even">
+<td>Chen et al. 2022</td>
+<td><span class="math inline">\(\chi^2\)</span> edge tests, ML vertex identification; simulation</td>
+<td>detection, recovery</td>
+<td>no</td>
+<td>current data assumed</td>
+</tr>
+<tr class="odd">
+<td>Vijay et al. 2025</td>
+<td>range-based integrity monitoring; SITL, Crazyflie</td>
+<td>detection, error</td>
+<td>no (synchronous)</td>
+<td>delivery assumed</td>
+</tr>
+<tr class="even">
+<td>Sophia et al. 2026</td>
+<td>GAT + zero-trust layer; UAVSwarm + overlay</td>
+<td>Byzantine F1 (0.968)</td>
+<td>bandwidth only</td>
+<td>no physics baseline</td>
+</tr>
+<tr class="odd">
+<td>Pan et al. 2026</td>
+<td>GAT + time-attention VAE on ranging; simulation</td>
+<td>localisation (+25.9%)</td>
+<td>no</td>
+<td>delivery assumed</td>
+</tr>
+<tr class="even">
+<td>Tariq et al. 2026; Tariq &amp; Shaukat 2026</td>
+<td>Kalman residuals + GNN (CNN/LSTM or transformer); simulation, 3-UAV pilot</td>
+<td>accuracy (≈97–98%), paired <span class="math inline">\(t\)</span>-tests</td>
+<td>delay, bursty loss; staleness gating (one)</td>
+<td>no loss-stratified results; no physics-only arm</td>
+</tr>
+<tr class="odd">
+<td>He et al. 2024</td>
+<td>decoupled CL, M-estimation; simulation</td>
+<td>localisation error</td>
+<td>failed links</td>
+<td>estimation, not detection</td>
+</tr>
+<tr class="even">
+<td>Kargar Tasooji &amp; Parasuraman 2025</td>
+<td>cubature KF, innovation gate; Robotarium</td>
+<td>localisation error</td>
+<td>binary link failure</td>
+<td>detection not scored</td>
+</tr>
+<tr class="odd">
+<td>Cao et al. 2026</td>
+<td>AoI × covariance × link-quality score; Monte Carlo</td>
+<td>RMSE</td>
+<td>AoI, packet loss</td>
+<td>estimator, not detector</td>
+</tr>
+<tr class="even">
+<td>Cini et al. 2022</td>
+<td>graph imputation (GRIN); sensor data</td>
+<td>MAE</td>
+<td>missing values</td>
+<td>corruption not flagged</td>
+</tr>
+<tr class="odd">
 <td>Deng &amp; Hooi 2021</td>
-<td>GNN sensor anomaly detection</td>
-<td>no (complete data)</td>
-<td>yes</td>
-</tr>
-<tr class="odd">
-<td>Dang et al. 2023</td>
-<td>GCN+GRU spoofing, simulation</td>
-<td>no (comm. trusted)</td>
-<td>yes</td>
-</tr>
-<tr class="even">
-<td>Mykytyn et al. 2023; Bi et al. 2024</td>
-<td>GPS-vs-UWB threshold (no results); SDP feasibility, simulation</td>
-<td>no</td>
-<td>no</td>
-</tr>
-<tr class="odd">
-<td>Cini et al. 2022; Zhu et al. 2019</td>
-<td>graph imputation; variance attention</td>
-<td>missing values only / no</td>
-<td>yes</td>
+<td>GDN, attention forecasting; SWaT, WADI</td>
+<td>F1 (0.81, 0.57)</td>
+<td>no (complete window)</td>
+<td>threshold-dependent F1</td>
 </tr>
 </tbody>
 </table>
-<p><em>Table 1. Comparative summary (details and weaknesses per paper in <code>literature/literature_matrix.md</code>).</em> Further sheaf variants (nonlinear <span class="citation" data-cites="zaghen2024nonlinear">(Zaghen et al. 2024)</span>, directed <span class="citation" data-cites="ribeiro2025cooperative">(Ribeiro et al. 2025)</span>), a preprint on sheaf-Laplacian fusion in sensing networks <span class="citation" data-cites="hernandez2026sheaf">(Hernández and Sánchez-Soto 2026)</span> (abstract only) and GNN swarm controllers on time-varying graphs <span class="citation" data-cites="tolstaya2020learning">(Tolstaya et al. 2020)</span> were noted but do not address detection under loss. <strong>Transfer risks:</strong> sheaf gains concern heterophily in static node classification, not local inconsistency detection on a physically constrained, time-varying swarm graph; all swarm evidence we found is simulated.</p>
+<p><em>Table 1. Closest works (W workshop paper, X preprint, CL cooperative localisation, KF Kalman filter, ML maximum likelihood). Research questions, assumptions and evidence levels: supplementary literature matrix.</em></p>
 <h2 id="research-gap">4. Research gap</h2>
 <blockquote>
-<p>Within the sources we could access, no study evaluates learned graph- or sheaf-based detectors of UAV position anomalies <strong>under explicitly modelled communication unreliability</strong> (packet loss, burst loss, age of information) <strong>against an age-aware physical-consistency baseline, with paired statistics over seeds.</strong> Existing swarm detectors assume reliable delivery or trust the communication topology; existing sheaf work does not address anomaly detection or lossy links.</p>
+<p>Model-based cooperative localisation already tolerates failed links, packet loss and AoI together with faulty measurements, and learned graph detectors of swarm spoofing have been run in simulators that include packet loss. Within the sources we could access, however, no study reports how detectors of UAV position anomalies, learned graph- or sheaf-based ones in particular, built on the consistency of reported positions with inter-UAV relative measurements, perform when <strong>iid loss, burst loss and AoI are controlled and results are stratified by condition</strong>, compared against <strong>a standalone age-aware physical-consistency baseline</strong>.</p>
 </blockquote>
-<p>The gap is <em>experimental and methodological</em>, supported by the absence of such a study in the works above (four dedicated gap-check queries, <code>search_log.md</code>). Two caveats limit it: IEEE/ACM coverage is incomplete, and classical cooperative-localisation fault tolerance (covariance union/intersection) appeared only in search snippets and is not reviewed here. If nobody closes the gap, claims that GNNs or sheaves “handle unreliable swarms” remain untested for the very confusion that matters operationally.</p>
+<p><em>Supporting publications:</em> swarm detectors assume that reports and ranges arrive <span class="citation" data-cites="bi2024detection chen2022cooperative vijay2025range">(Bi et al. 2024; Chen et al. 2022; Vijay et al. 2025)</span> or use the channel as reference <span class="citation" data-cites="dang2023graphic">(Dang, Karakoc, and Jäntti 2023)</span>; learned ones treat communication as a bandwidth constraint <span class="citation" data-cites="sophia2026zerotrust">(Sophia et al. 2026)</span>, assume delivery <span class="citation" data-cites="pan2026satellite">(Pan et al. 2026)</span>, or simulate loss but report no loss-stratified results or physics-only test <span class="citation" data-cites="tariq2026tristream tariq2026mission">(Tariq, Ahanger, and Shaukat 2026; Tariq and Shaukat 2026)</span>; robust estimators down-weight data and are scored by localisation error <span class="citation" data-cites="he2024robust kargartasooji2025distributed cao2026quality">(He, Shan, and Huang 2024; Kargar Tasooji and Parasuraman 2025; Cao et al. 2026)</span>; sheaf methods localise inconsistent sensors without a loss model <span class="citation" data-cites="joslyn2020sheaf hernandez2026sheaf moustafa2026finite">(Joslyn et al. 2020; Hernández and Sánchez-Soto 2026; Moustafa and Abdelghany 2026)</span>. The gap is <em>experimental and methodological</em>. Caveats: IEEE Xplore and ACM DL were reached only through metadata indexes, and seven works of Table 1 were read at abstract level only. If nobody closes it, detectors stay validated on links that never fail, and those that ignore staleness read outages as attacks (in our simulation: 0.894 → 0.519 PR-AUC under 50% bursts).</p>
 <h2 id="proposed-solution-ra-scm">5. Proposed solution: RA-SCM</h2>
-<p><strong>Inconsistency measure.</strong> For receiver <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math> and neighbour <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math> with last delivery <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>τ</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mi>t</mi><mo>−</mo><msub><mi>a</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\tau_{ij}=t-a_{ij}</annotation></semantics></math>, <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>e</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mo minsize="1.2" maxsize="1.2" stretchy="false" form="prefix">(</mo><msub><mover><mi>p</mi><mo accent="true">̂</mo></mover><mi>j</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>τ</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo>+</mo><msub><mover><mi>v</mi><mo accent="true">̂</mo></mover><mi>j</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>τ</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mspace width="0.167em"></mspace><msub><mi>a</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mi>Δ</mi><mi>t</mi><mo>−</mo><msub><mover><mi>p</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo minsize="1.2" maxsize="1.2" stretchy="false" form="postfix">)</mo><mo>−</mo><msub><mi>r</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">e_{ij}(t)=\big(\hat p_j(\tau_{ij})+\hat v_j(\tau_{ij})\,a_{ij}\Delta t-\hat p_i(t)\big)-r_{ij}(t).</annotation></semantics></math> If only <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math> is displaced by <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>o</mi><mi>i</mi></msub><annotation encoding="application/x-tex">o_i</annotation></semantics></math> then <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mo stretchy="false" form="prefix">[</mo><msub><mi>e</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="false" form="postfix">]</mo><mo>=</mo><mo>−</mo><msub><mi>o</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">E[e_{ij}]=-o_i</annotation></semantics></math> and <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mo stretchy="false" form="prefix">[</mo><msub><mi>e</mi><mrow><mi>j</mi><mi>i</mi></mrow></msub><mo stretchy="false" form="postfix">]</mo><mo>=</mo><mo>+</mo><msub><mi>o</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">E[e_{ji}]=+o_i</annotation></semantics></math>; if <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>’s cached report was displaced, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mo stretchy="false" form="prefix">[</mo><msub><mi>e</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="false" form="postfix">]</mo><mo>=</mo><msub><mi>o</mi><mi>j</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>τ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">E[e_{ij}]=o_j(\tau)</annotation></semantics></math>. Under no anomaly the covariance grows with the age: <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Σ</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>a</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mo stretchy="false" form="prefix">(</mo><msubsup><mi>σ</mi><mi>i</mi><mn>2</mn></msubsup><mo>+</mo><msubsup><mi>σ</mi><mi>j</mi><mn>2</mn></msubsup><mo>+</mo><msubsup><mi>σ</mi><mi>r</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo><mi>I</mi><mo>+</mo><mo minsize="1.2" maxsize="1.2" stretchy="false" form="prefix">[</mo><mo stretchy="false" form="prefix">(</mo><mi>a</mi><mi>Δ</mi><mi>t</mi><mspace width="0.167em"></mspace><msub><mi>σ</mi><mi>v</mi></msub><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mstyle displaystyle="false"><mfrac><mn>1</mn><mn>2</mn></mfrac></mstyle><msub><mi>σ</mi><mrow><mi>a</mi><mi>c</mi><mi>c</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>a</mi><mi>Δ</mi><mi>t</mi><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup><mo minsize="1.2" maxsize="1.2" stretchy="false" form="postfix">]</mo><mi>I</mi></mrow><annotation encoding="application/x-tex">\Sigma_{ij}(a)=(\sigma_i^2+\sigma_j^2+\sigma_r^2)I+\big[(a\Delta t\,\sigma_v)^2+(\tfrac12\sigma_{acc}(a\Delta t)^2)^2\big]I</annotation></semantics></math>. This is the Dirichlet energy <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mo>∑</mo><mi>e</mi></msub><msub><mi>w</mi><mi>e</mi></msub><mo stretchy="false" form="postfix">∥</mo><mi>δ</mi><mi>x</mi><msup><mo stretchy="false" form="postfix">∥</mo><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\sum_e w_e\|\delta x\|^2</annotation></semantics></math> of a cellular sheaf whose stalks hold <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mover><mi>p</mi><mo accent="true">̂</mo></mover><mo>,</mo><mover><mi>v</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\hat p,\hat v)</annotation></semantics></math>, restriction maps project to position, the edge datum is <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>r</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">r_{ij}</annotation></semantics></math> and the edge inner product is <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mi>e</mi></msub><mo>=</mo><msubsup><mi>Σ</mi><mi>e</mi><mrow><mo>−</mo><mn>1</mn></mrow></msubsup></mrow><annotation encoding="application/x-tex">w_e=\Sigma_e^{-1}</annotation></semantics></math> — a <em>weighted</em> sheaf Laplacian <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mi>w</mi></msub><mo>=</mo><msup><mi>δ</mi><mi>⊤</mi></msup><mi>W</mi><mi>δ</mi></mrow><annotation encoding="application/x-tex">L_w=\delta^\top W\delta</annotation></semantics></math> (a choice of inner products on stalks <span class="citation" data-cites="hansen2019spectral">(Hansen and Ghrist 2019)</span>). The <strong>age-aware physics detector</strong> (Baseline 1b) evaluates exactly this energy with fixed maps; RA-SCM lets the maps and weights be learned.</p>
-<p><strong>Four situations kept apart.</strong> <em>Unobserved connection</em> (out of range: no edge); <em>in range, nothing ever received</em> (edge with <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">w=0</annotation></semantics></math>: no evidence, never a fault); <em>received but uncertain</em> (stale: small <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>w</mi><annotation encoding="application/x-tex">w</annotation></semantics></math> and motion-compensated residual); <em>corrupted report</em> (fresh data, residuals consistent across neighbours). Missing communication is therefore never converted into a sensor fault. <em>Identifiability:</em> a common offset of all UAVs leaves every relative quantity unchanged; it is observable only through an independent absolute reference (here the IMU velocity versus the position difference, which detects jumps and ramps but not a static bias after the onset window). A spoofed <em>group</em> with a common vector is visible only on boundary edges. If a UAV has no neighbour with usable evidence, detection is impossible in principle.</p>
-<p><strong>Architecture</strong> (Figure A1). Node features (IMU velocity, kinematic residual, self-reported accuracy, degree) are encoded into stalk states <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mi>i</mi></msub><mo>∈</mo><msup><mstyle mathvariant="double-struck"><mi>ℝ</mi></mstyle><mrow><mi>d</mi><mo>×</mo><mi>f</mi></mrow></msup></mrow><annotation encoding="application/x-tex">x_i\in\mathbb R^{d\times f}</annotation></semantics></math>. Each of two sheaf layers reads neighbour states <em>from the time of the last delivered packet</em> (so no layer can use uncommunicated information), computes learned restriction maps <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>F</mi><mi>i</mi></msub><mo>,</mo><msub><mi>F</mi><mi>j</mi></msub><mo>=</mo><mo>tanh</mo><mi>Φ</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>,</mo><msub><mi>x</mi><mi>j</mi></msub><mo>,</mo><msub><mi>e</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">F_i,F_j=\tanh\Phi(x_i,x_j,e_{ij})</annotation></semantics></math>, a translation <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mi>g</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>e</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">b_{ij}=g(e_{ij})</annotation></semantics></math> and the residual <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ρ</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><msub><mi>F</mi><mi>i</mi></msub><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><msub><mi>F</mi><mi>j</mi></msub><msub><mi>x</mi><mi>j</mi></msub><mo>−</mo><msub><mi>b</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\rho_{ij}=F_ix_i-F_jx_j-b_{ij}</annotation></semantics></math> (equivalent to a sheaf on stalks augmented by a constant coordinate), weights <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mi>σ</mi><mo stretchy="false" form="prefix">(</mo><mstyle mathvariant="normal"><mi>M</mi><mi>L</mi><mi>P</mi></mstyle><mo stretchy="false" form="prefix">[</mo><mi>m</mi><mo>,</mo><mtext mathvariant="normal">age</mtext><mo>,</mo><mi>q</mi><mo>,</mo><mtext mathvariant="normal">has</mtext><mo stretchy="false" form="postfix">]</mo><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">w_{ij}=\sigma(\mathrm{MLP}[m,\text{age},q,\text{has}])</annotation></semantics></math> from delivery, age and link quality, and updates <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mi>i</mi></msub><mo>←</mo><mstyle mathvariant="normal"><mi>L</mi><mi>N</mi></mstyle><mo stretchy="false" form="prefix">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><mstyle mathvariant="normal"><mi>E</mi><mi>L</mi><mi>U</mi></mstyle><mo stretchy="false" form="prefix">(</mo><msub><mo>∑</mo><mi>j</mi></msub><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><msubsup><mi>F</mi><mi>i</mi><mi>⊤</mi></msubsup><msub><mi>ρ</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mi>/</mi><msub><mo>∑</mo><mi>j</mi></msub><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mspace width="0.167em"></mspace><mi>W</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">x_i\leftarrow \mathrm{LN}(x_i-\mathrm{ELU}(\sum_j w_{ij}F_i^\top\rho_{ij}/\sum_j w_{ij}\,W))</annotation></semantics></math>. The weighted energy and the evidence mass <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mo>∑</mo><mi>j</mi></msub><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\sum_jw_{ij}</annotation></semantics></math> feed a GRU and an MLP head. Cost is <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false" form="prefix">(</mo><mo stretchy="false" form="prefix">|</mo><mi>E</mi><mo stretchy="false" form="prefix">|</mo><mo stretchy="false" form="prefix">(</mo><mn>2</mn><mi>H</mi><mo>+</mo><msub><mi>F</mi><mi>e</mi></msub><mo stretchy="false" form="postfix">)</mo><mi>K</mi><mo>+</mo><mo stretchy="false" form="prefix">|</mo><mi>E</mi><mo stretchy="false" form="prefix">|</mo><msup><mi>d</mi><mn>2</mn></msup><mi>f</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">O(|E|(2H+F_e)K+|E|d^2 f)</annotation></semantics></math> per layer (dense <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">|</mo><mi>E</mi><mo stretchy="false" form="prefix">|</mo><mo>≤</mo><msup><mi>N</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">|E|\le N^2</annotation></semantics></math>); 17.6k parameters.</p>
-<p><strong>What is original.</strong> <em>Taken:</em> sheaf Laplacian, restriction maps, NSD-style diffusion, GCN/GAT, uncertainty weighting, Gilbert–Elliott loss, constant-velocity compensation. <em>Adapted:</em> delayed-message semantics, affine restriction. <em>New in combination:</em> reliability weights from delivery metadata as the inner product on edge stalks, with evidence mass, inside sheaf diffusion. The main novelty claimed is the <em>protocol</em>: loss, burst and targeted-blackout confounding, a frozen operating point, paired seeds, an age-aware physics control and ablations that separate edge conditioning, sheaf maps, weights, the reliability channel and temporal memory. <em>Failure modes:</em> maps collapsing to identity (RA-SCM then equals an edge-conditioned MPNN), saturated weights, shortcut reliance on age, noise shift, unobservable common-mode attacks. <em>Simpler alternatives:</em> the age-aware physics test; GCN/GAT with the same inputs.</p>
+<p><strong>Inconsistency measure.</strong> For receiver <span class="math inline">\(i\)</span> and neighbour <span class="math inline">\(j\)</span> with last delivery <span class="math inline">\(\tau_{ij}=t-a_{ij}\)</span>, <span class="math display">\[e_{ij}(t)=\big(\hat p_j(\tau_{ij})+\hat v_j(\tau_{ij})\,a_{ij}\Delta t-\hat p_i(t)\big)-r_{ij}(t).\]</span> If only <span class="math inline">\(i\)</span> is displaced by a constant <span class="math inline">\(o_i\)</span>, then <span class="math inline">\(E[e_{ij}]={-o_i}\)</span> and <span class="math inline">\(E[e_{ji}]={+o_i}\)</span> (in general <span class="math inline">\(o_i(\tau_{ji})\)</span>); if <span class="math inline">\(j\)</span>’s cached report was displaced, <span class="math inline">\(E[e_{ij}]=o_j(\tau_{ij})\)</span>. Without anomaly the covariance grows with age, <span class="math display">\[\Sigma_{ij}(a)=(\sigma_i^2+\sigma_j^2+\sigma_r^2)I+\big[(a\Delta t\,\sigma_v)^2+(\tfrac12\sigma_{acc}(a\Delta t)^2)^2\big]I .\]</span> Summed over pairs, <span class="math inline">\(\sum e_{ij}^\top\Sigma_{ij}^{-1}e_{ij}=\lVert\delta x-r\rVert_W^2\)</span> is the affine Dirichlet energy of a cellular sheaf with stalks <span class="math inline">\((\hat p,\hat v)\)</span>, receiver map <span class="math inline">\([I\;\,0]\)</span>, sender map <span class="math inline">\([I\;\;a_{ij}\Delta t\,I]\)</span> on the cached state, edge datum <span class="math inline">\(r_{ij}\)</span> and edge inner product <span class="math inline">\(\Sigma_e^{-1}\)</span>; its quadratic part is <span class="math inline">\(x^\top L_w x\)</span>, <span class="math inline">\(L_w=\delta^\top W\delta\)</span> <span class="citation" data-cites="hansen2019spectral">(Hansen and Ghrist 2019)</span>. The <strong>AoI-aware physics test</strong> (Baseline 1) uses these residuals and precision weights <span class="math inline">\(w_{ij}\)</span> with fixed maps and scores UAV <span class="math inline">\(i\)</span> by <span class="math inline">\(u_i=\big(\sum_j w_{ji}e_{ji}-\sum_j w_{ij}e_{ij}\big)/\sqrt{W_i}\)</span>, <span class="math inline">\(W_i=\sum_j(w_{ij}+w_{ji})\)</span>, half the energy gradient with respect to a shift of <span class="math inline">\(\hat p_i\)</span>: for an offset of <span class="math inline">\(i\)</span> alone <span class="math inline">\(E[u_i]=\sqrt{W_i}\,o_i\)</span>, so the displaced UAV is localised. <span class="math inline">\(u_i\)</span> is smoothed causally and combined (maximum) with an IMU-versus-position kinematic test. It extends the edge tests of <span class="citation" data-cites="chen2022cooperative">Chen et al. (2022)</span> with an age-dependent covariance; the naive variant uses the uncompensated residual and no age term.</p>
+<p><strong>Four situations kept apart.</strong> <em>Out of range</em> (no edge); <em>in range, never received</em> (<span class="math inline">\(w=0\)</span>: no evidence, never a fault); <em>received but stale</em> (small <span class="math inline">\(w\)</span>, motion-compensated residual); <em>corrupted report</em> (fresh data, residuals consistent across neighbours). In the physics test missing data only lowers a weight; in RA-SCM delivery state and age also enter <span class="math inline">\(\Phi\)</span>, the translation and the head, so the separation is a design goal the model must learn, not a guarantee. <em>Identifiability:</em> a common offset of all UAVs leaves every relative quantity unchanged <span class="citation" data-cites="park2026rigid">(Park and Yoo 2026)</span>; only its changes are seen, through the IMU velocity versus the position difference (jumps and ramps, not a static bias after onset). A spoofed group is visible only on boundary edges, and a UAV without usable neighbours keeps only this kinematic check.</p>
+<p><strong>Architecture</strong> (Figure A1). Node features (IMU velocity, kinematic residual, self-reported accuracy, degree) are encoded into stalk states <span class="math inline">\(x_i\in\mathbb R^{d\times f}\)</span>. Each of two sheaf layers reads neighbour states <em>from the time of the last delivered packet</em>, computes restriction maps <span class="math inline">\(F_i,F_j=\tanh\Phi(x_i,x_j,e_{ij})\)</span>, a translation <span class="math inline">\(b_{ij}\in\mathbb R^{d\times f}\)</span> from a second head of <span class="math inline">\(\Phi\)</span>, the residual <span class="math inline">\(\rho_{ij}=F_ix_i-F_jx_j-b_{ij}\)</span> (a sheaf on stalks augmented by <span class="math inline">\(f\)</span> constant coordinates), weights <span class="math inline">\(w_{ij}=\sigma(\text{MLP}[m_{ij},a_{ij},q_{ij},h_{ij}])\)</span> from delivery, age, a link-quality proxy <span class="math inline">\(q_{ij}\)</span> and a has-ever-received flag <span class="math inline">\(h_{ij}\)</span>, and updates <span class="math inline">\(x_i\leftarrow\text{LN}\big(x_i-\text{ELU}\big((\textstyle\sum_j w_{ij}F_i^\top\rho_{ij}/\sum_j w_{ij})\,\Theta\big)\big)\)</span> with a learned <span class="math inline">\(\Theta\in\mathbb R^{f\times f}\)</span>. The weighted energy and the evidence mass <span class="math inline">\(\sum_jw_{ij}\)</span> feed a GRU and an MLP head (17.6k parameters; cost <span class="math inline">\(O(|E|(2df+F_e)K+|E|d^2 f)\)</span> per layer, <span class="math inline">\(F_e\)</span> edge features, <span class="math inline">\(K\)</span> width of <span class="math inline">\(\Phi\)</span>). Because <span class="math inline">\(\Phi\)</span> sees direction-specific features and <span class="math inline">\(w_{ij}\neq w_{ji}\)</span>, each receiver uses its own maps: the layer is a receiver-centric, <em>sheaf-inspired</em> diffusion that equals the weighted sheaf Laplacian only for symmetric maps and weights and zero ages (the unit-tested case).</p>
+<p><strong>What is original.</strong> <em>Taken:</em> sheaf Laplacian, NSD-style diffusion, GCN/GAT, uncertainty weighting, Gilbert–Elliott loss, AoI, edge consistency tests <span class="citation" data-cites="chen2022cooperative">(Chen et al. 2022)</span>. <em>Adapted:</em> delayed-message semantics, extending the delayed information structure of decentralised GNN controllers <span class="citation" data-cites="tolstaya2020learning">(Tolstaya et al. 2020)</span> to the age of the last delivered packet; affine restriction <span class="citation" data-cites="moustafa2026finite">(used, non-learned, by Moustafa and Abdelghany 2026)</span>. <em>New in combination:</em> receiver-specific reliability weights learned from delivery metadata, with evidence mass, inside sheaf-style diffusion; weighting neighbours by AoI and link quality is itself known from estimation <span class="citation" data-cites="cao2026quality">(Cao et al. 2026)</span>. The main claim is the <em>protocol</em>, whose elements partly appear elsewhere <span class="citation" data-cites="tariq2026tristream">(modelled loss and paired seeds in Tariq, Ahanger, and Shaukat 2026)</span> but not in combination: loss, burst and targeted-blackout confounding, a frozen operating point, paired seeds, an age-aware physics control and ablations that separate edge conditioning, maps, weights, the reliability channel and temporal memory. <em>Failure modes:</em> maps collapsing to identity (RA-SCM then equals an edge-conditioned message-passing network, MPNN-E), saturated weights, shortcut reliance on age. <em>Simpler alternatives:</em> the AoI-aware physics test; GCN/GAT with the same inputs. <em>Weakest assumption:</em> that white Gaussian noise and a two-state Gilbert–Elliott channel represent real UAV sensing and links; with longer-memory loss or heavy-tailed noise the learned weights and frozen thresholds may not transfer, which is why the €500 plan calibrates channel and noise first.</p>
 <h2 id="methodology-and-experimental-design">6. Methodology and experimental design</h2>
-<p><strong>Data (simulated).</strong> A 2-D swarm of 5, 10 or 20 UAVs tracks formation slots (circle, line, wedge; grid unseen) behind a leader (random-turn, circle; Lissajous unseen) with a PD law, bounded acceleration and wind (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mo>=</mo><mn>100</mn></mrow><annotation encoding="application/x-tex">T=100</annotation></semantics></math> steps of 0.5 s). Sensors: GNSS-like noise 1 m, relative sensor 0.3 m, IMU velocity 0.2 m/s, communication and sensing range 30 m, formation “breathing” that changes the graph over time. <em>Anomalies</em> are injected into the reported position: sudden step (4–12 m), drift (0.2–0.6 m/step), spoof-like common offset of a group of 1–3 UAVs (6–15 m, ramped), or a mixture; a UAV is labelled anomalous when <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="postfix">∥</mo><msub><mi>o</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">∥</mo><mo>≥</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">\|o_i\|\ge2</annotation></semantics></math> m, and “ambiguous” steps (injection active but below 2 m) are excluded from scoring. <em>Communication:</em> iid loss, per-link Gilbert–Elliott bursts <span class="citation" data-cites="gilbert1960capacity elliott1963estimates">(Gilbert 1960; Elliott 1963)</span> (mean length 5), receiver-correlated bursts, <em>targeted blackout</em> (70% extra loss on the links of the anomalous UAV), and link blockage events. Loss levels: 0, 10, 30, 50%. Real, measured and reported states, labels and the communication-failure mask are stored separately; models see only an <code>Observation</code>, and unit tests check that replacing every hidden field changes no feature and that no feature depends on future observations.</p>
-<p><strong>Models.</strong> Baseline 1: physics consistency, <em>naive</em> (stale reports treated as current) and <em>AoI-aware</em>. Baseline 2: GCN <span class="citation" data-cites="kipf2017semi">(Kipf and Welling 2017)</span>; plus GCN that drops lost links. Baseline 3: GAT <span class="citation" data-cites="velickovic2018graph">(Veličković et al. 2018)</span>. Baseline 4: NSD-style sheaf <span class="citation" data-cites="bodnar2022neural">(Bodnar et al. 2022)</span> (our dense re-implementation with general <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mo>×</mo><mi>d</mi></mrow><annotation encoding="application/x-tex">d\times d</annotation></semantics></math> maps and random-walk normalisation by the neighbour count instead of <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>D</mi><mrow><mo>−</mo><mn>1</mn><mi>/</mi><mn>2</mn></mrow></msup><mi>Δ</mi><msup><mi>D</mi><mrow><mo>−</mo><mn>1</mn><mi>/</mi><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">D^{-1/2}\Delta D^{-1/2}</annotation></semantics></math>; it is not a reproduction of the original code). Proposed: RA-SCM. All learned models share the GRU/head design, delayed-message semantics, raw inputs, training budget (≤30 epochs, early stopping) and parameter counts within 10% of RA-SCM (tested). GCN/GAT/NSD receive edge information as neighbourhood statistics appended to the node vector (they have no edge input); the MPNN-E control removes this asymmetry. Our GCN/GAT layers were cross-checked against PyTorch Geometric. We did <strong>not</strong> implement the semidefinite detector of Bi et al. or classical cooperative localisation.</p>
-<p><strong>Protocol.</strong> Per seed (0–4): 200 training and 60 validation episodes from a mixture of seen conditions, and 40 independent test episodes per condition (26 conditions); episode seeds come from disjoint ranges. Learning rates were chosen on a separate tuning seed and split (grid 0.001–0.03); nothing was tuned on test data. The operating point of every model is the 5%-FPR threshold on the pooled validation set, frozen for all test conditions. Metrics: <strong>PR-AUC</strong> (average precision, scikit-learn definition; chance = positive rate) as primary; precision, recall, F1, FPR, ROC-AUC, detection rate and delay (first alarm of two consecutive steps), parameters, CPU latency. Uncertainty: mean ± 95% <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>-interval over the five seeds and paired differences across seeds.</p>
+<p><strong>Data (simulated).</strong> A 2-D swarm of 5, 10 or 20 UAVs tracks formation slots (circle, line, wedge; grid unseen) behind a leader (random-turn, circle; Lissajous unseen) with a proportional–derivative law, bounded acceleration and wind (<em>T</em> = 100 steps of 0.5 s). Sensors: GNSS-like noise 1 m, relative sensor 0.3 m, IMU velocity 0.2 m/s, range 30 m, formation “breathing” that changes the graph. <em>Anomalies</em> are added to the reported position: sudden step (4–12 m), drift (0.2–0.6 m/step), spoof-like common offset of 1–3 UAVs (6–15 m, ramped), or a mixture; steps with <span class="math inline">\(\lVert o_i\rVert\ge 2\)</span> m are positive, and active injections below 2 m are excluded from scoring. <em>Communication:</em> iid loss, per-link Gilbert–Elliott bursts <span class="citation" data-cites="gilbert1960capacity elliott1963estimates">(Gilbert 1960; Elliott 1963)</span> (mean length 5), <em>rx-burst</em> (one burst chain per receiver, so all links into a UAV fail together), <em>targeted blackout</em> (70% extra loss on a UAV’s links while its report is anomalous) and link blockage; loss levels 0, 10, 30, 50%. Truth, labels and the failure mask are stored apart from the <code>Observation</code> type that models receive; unit tests check that the feature builder accepts only that type, that overwriting hidden positions, offsets, labels and the failure mask changes no feature, and that no feature uses future data.</p>
+<p><strong>Models.</strong> Baseline 1: physics test, <em>naive</em> and <em>AoI-aware</em> (Section 5). Baseline 2: GCN <span class="citation" data-cites="kipf2017semi">(Kipf and Welling 2017)</span> and GCN-drop (lost links removed). Baseline 3: GAT <span class="citation" data-cites="velickovic2018graph">(Veličković et al. 2018)</span>. Baseline 4: NSD-style sheaf <span class="citation" data-cites="bodnar2022neural">(Bodnar et al. 2022)</span> (our dense re-implementation with general <span class="math inline">\(d\times d\)</span> maps and random-walk instead of symmetric normalisation; not the original code). Proposed: RA-SCM. All learned models share the GRU/head, delayed-message semantics, inputs, training budget (≤30 epochs, early stopping) and parameter counts within 10% of RA-SCM (tested); GCN/GAT/NSD receive edge information as neighbourhood statistics, and MPNN-E removes this asymmetry. GCN/GAT layers were cross-checked against PyTorch Geometric. The detector of <span class="citation" data-cites="bi2024detection">Bi et al. (2024)</span> and classical cooperative localisation were <strong>not</strong> implemented.</p>
+<p><strong>Protocol</strong> (Table 2). Per seed (0–4): 200 training and 60 validation episodes from a mixture of seen conditions and 40 test episodes per condition (26 conditions), from disjoint seed ranges. Conditions of one <em>family</em> (e.g. all 12 loss and blockage conditions, including <span class="math inline">\(C^*\)</span> of Section 8) share trajectories, noise and anomaly schedules, so cross-condition comparisons are paired and the conditions of <span class="math inline">\(C^*\)</span> are not independent. Learning rates were chosen on a separate tuning seed (grid 0.001–0.03). Every model’s threshold gives a 5% false-positive rate (FPR) on pooled validation data and is frozen for all tests. Metrics: <strong>PR-AUC</strong> (average precision, scikit-learn; chance = positive rate) as primary; precision, recall, F1, FPR, ROC-AUC, detection rate and delay (first of two consecutive alarms), parameters, CPU latency; mean ± 95% <span class="math inline">\(t\)</span>-interval over seeds and paired differences.</p>
+<p><strong>Sample size.</strong> The unit of replication is the training seed (UAV-steps within an episode are correlated). Five seeds were fixed in the project plan as the minimum for one laptop; no a-priori power analysis was done. Post hoc, the seed-to-seed SD of the paired <span class="math inline">\(\Delta_c\)</span> (Section 8) was 0.003–0.013, so a true <span class="math inline">\(\Delta_c\)</span> of about 0.005–0.022 would give an interval above 0 with 80% probability; since the rule also requires a mean ≥0.02, a true effect of exactly 0.02 would be declared only about half the time (a conservative rule). Each 10-UAV condition yields up to 40,000 scored UAV-steps per seed.</p>
 <table>
-<colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
-</colgroup>
 <thead>
 <tr class="header">
 <th>Exp.</th>
@@ -161,12 +237,12 @@ Mehmet Ünlü (040230253) · unlu23@itu.edu.tr · Istanbul Technical University,
 <tr class="odd">
 <td>E3</td>
 <td>bursty / correlated loss</td>
-<td>Gilbert–Elliott 10/30/50%; receiver-correlated 30%</td>
+<td>Gilbert–Elliott 10/30/50%; rx-burst 30%</td>
 </tr>
 <tr class="even">
 <td>E4</td>
 <td>anomaly + communication failure</td>
-<td>targeted blackout; link blockage; per anomaly type (sudden, drift, spoof) at 0/30%</td>
+<td>targeted blackout; link blockage; anomaly type (sudden, drift, spoof) at 0/30%</td>
 </tr>
 <tr class="odd">
 <td>E5</td>
@@ -187,32 +263,21 @@ Mehmet Ünlü (040230253) · unlu23@itu.edu.tr · Istanbul Technical University,
 </table>
 <p><em>Table 2. Experiments. Controlled: swarm size 10, anomaly mixture, noise, training budget.</em></p>
 <h2 id="feasibility-and-limitations">7. Feasibility and limitations</h2>
-<p><strong>Resources.</strong> The study runs on one laptop CPU (Apple M1, 16 GB, no GPU): training the ten learned variants for one seed took 56 min of single-thread CPU time (five seeds as parallel processes, about an hour of wall-clock). Software is open source (Python, PyTorch, scikit-learn, Streamlit); required expertise is graph learning and basic estimation theory; three months suffice (review, simulator/tests, models/experiments, writing). With <strong>€500</strong> the minimum meaningful extension is <em>calibration, not flight</em>: about 6 ESP32 boards (≈€60) to log real packet-loss traces and fit the Gilbert–Elliott parameters, 4 UWB boards and 2 GNSS modules (≈€250) to measure real ranging/GNSS noise on a walked or wheeled test, leaving a reserve. This tests the simulator’s assumptions, the weakest link.</p>
-<p><strong>Ethics, privacy, safety.</strong> The work is defensive; the attack models are generic perturbations, not operational tooling. Real swarm logs could reveal movements and would need anonymisation; none are used. A detector deployed without validation could cause unnecessary aborts or miss attacks; these results are not certification evidence. Field tests of GNSS spoofing are regulated and out of scope.</p>
-<p><strong>Limitations.</strong> (i) <em>Simulation-to-reality gap:</em> Gaussian white noise, a lightweight kinematic model, a hand-designed channel family and a single simulator written by the authors, who also designed the proposed model (benchmark bias). (ii) The physics baselines use the simulator’s nominal sensor specifications. (iii) Five seeds give wide <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>-intervals (4 degrees of freedom). (iv) Learned models were trained with 10-UAV swarms; learning rates for GCN/GCN-drop lie on the edge of the final grid. (v) NSD is a re-implementation. (vi) Latency is amortised CPU throughput, not embedded latency. (vii) Literature coverage gaps (Section 3). <strong>Beyond our capability:</strong> flight experiments, adversarial attackers who adapt to the detector, and formal guarantees.</p>
+<p><strong>Resources.</strong> One laptop CPU (Apple M1, 16 GB, no GPU): training the ten learned variants took 56 min per seed (one thread per process; five seeds in parallel, roughly an hour in total). Software is open source (Python, PyTorch, Streamlit); expertise: graph learning and estimation theory; time: three months (Section 10). With <strong>€500</strong> the minimum meaningful extension is <em>calibration, not flight</em>: about 6 ESP32 boards (≈€60) to log packet-loss traces and fit the Gilbert–Elliott parameters, and 4 UWB boards and 2 GNSS modules (≈€250) to measure ranging and GNSS noise on a walked test (rough retail estimates, October 2026).</p>
+<p><strong>Ethics, safety, regulation.</strong> The work is defensive; the attack models are generic perturbations, not tooling. Real swarm logs would need anonymisation; none are used. An unvalidated detector could cause needless aborts or miss attacks; these results are not certification evidence. Transmitting spoofing or jamming signals without authorisation is prohibited under radio-spectrum law, and flight tests fall under drone rules (EU Implementing Regulation 2019/947; in Turkey, the civil aviation authority SHGM), so this study is simulation-only.</p>
+<p><strong>Limitations.</strong> (i) Simulation-to-reality gap: Gaussian noise, a light kinematic model, a hand-designed channel family and a simulator written for this study (by the author with an AI coding assistant), the same source as the proposed model (benchmark bias). (ii) Physics baselines use nominal sensor specifications. (iii) Five seeds give wide intervals. (iv) Training used 10-UAV swarms; GCN/GCN-drop learning rates lie on the grid edge. (v) NSD is a re-implementation. (vi) Latency is amortised CPU throughput. <strong>Beyond our capability:</strong> flight experiments, adaptive attackers, formal guarantees.</p>
 <h2 id="validation-and-falsifiable-hypothesis">8. Validation and falsifiable hypothesis</h2>
-<p>Let <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Δ</mi><mi>c</mi></msub><mo>=</mo><msub><mtext mathvariant="normal">PR-AUC</mtext><mi>c</mi></msub><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">RA-SCM</mtext><mo stretchy="false" form="postfix">)</mo><mo>−</mo><msub><mo>max</mo><mrow><mi>m</mi><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mtext mathvariant="normal">GCN, GAT, GCN-drop, NSD</mtext><mo stretchy="false" form="postfix">}</mo></mrow></msub><msub><mtext mathvariant="normal">PR-AUC</mtext><mi>c</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>m</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\Delta_c=\text{PR-AUC}_c(\text{RA-SCM})-\max_{m\in\{\text{GCN, GAT, GCN-drop, NSD}\}}\text{PR-AUC}_c(m)</annotation></semantics></math>, paired by seed, on the loss conditions <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>C</mi><mo>*</mo></msup><mo>=</mo><mo stretchy="false" form="prefix">{</mo></mrow><annotation encoding="application/x-tex">C^*=\{</annotation></semantics></math>iid 30, iid 50, burst 30, burst 50, receiver-burst 30, targeted 30<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo stretchy="false" form="postfix">}</mo><annotation encoding="application/x-tex">\}</annotation></semantics></math>.</p>
+<p>Let <span class="math inline">\(\Delta_c=\text{PR-AUC}_c(\text{RA-SCM})-\max_{m\in\{\text{GCN, GAT, GCN-drop, NSD}\}}\text{PR-AUC}_c(m)\)</span>, paired by seed (maximum taken per seed), on <span class="math inline">\(C^*=\{\)</span>iid 30%, iid 50%, burst 30%, burst 50%, rx-burst 30%, targeted 30%<span class="math inline">\(\}\)</span>.</p>
 <ul>
-<li><strong>H0:</strong> reliability-aware sheaf modelling gives no benefit over capacity-matched conventional GNNs: <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Δ</mi><mi>c</mi></msub><mo>≤</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\Delta_c\le 0</annotation></semantics></math>.</li>
-<li><strong>H1:</strong> <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Δ</mi><mi>c</mi></msub><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\Delta_c&gt;0</annotation></semantics></math> and <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Δ</mi><mi>c</mi></msub><mo>≥</mo><mn>0.02</mn></mrow><annotation encoding="application/x-tex">\Delta_c\ge 0.02</annotation></semantics></math> (smallest effect of interest).</li>
-<li><strong>Decision rule:</strong> H1 is supported at <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>c</mi><annotation encoding="application/x-tex">c</annotation></semantics></math> if the 95% <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>-interval of the paired <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>Δ</mi><mi>c</mi></msub><annotation encoding="application/x-tex">\Delta_c</annotation></semantics></math> lies above 0 and its mean is ≥0.02. The contribution is <em>supported</em> only if H1 holds in ≥4 of the 6 conditions <strong>and</strong> RA-SCM’s FPR at 50% iid loss is not above the best conventional GNN’s by more than 0.02.</li>
-<li><strong>What disproves the idea:</strong> the interval of <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>Δ</mi><mi>c</mi></msub><annotation encoding="application/x-tex">\Delta_c</annotation></semantics></math> contains 0 or is negative in ≥3 conditions; or the AoI-aware physics baseline is at least as good as RA-SCM (paired difference ≤ 0) on <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>C</mi><mo>*</mo></msup><annotation encoding="application/x-tex">C^*</annotation></semantics></math> — then reliability-aware <em>learning</em> adds nothing over a simple test; or ablations show the gain comes from edge conditioning rather than from sheaf maps or reliability weights (MPNN-E ≈ RA-SCM).</li>
-<li><strong>Timing of the rule.</strong> The per-condition criterion (interval &gt; 0, Δ ≥ 0.02) was fixed in the analysis code before the main runs; the aggregation over conditions (≥4 of 6) and the falsification clauses were written down while the baselines were training, before any RA-SCM result had been inspected.</li>
-<li><strong>Bias, overfitting, alternatives, reproducibility:</strong> frozen operating point, disjoint seed ranges, paired seeds, capacity matching, tuning only on a tuning seed, same inputs for all models, ablations for parameter/information confounds, fixed seeds and configs in the repository. <strong>Negative results</strong> would still show where reliability-aware sheaf modelling does not pay and give the first controlled comparison of GNNs against an age-aware physics control under loss.</li>
+<li><strong>H0:</strong> <span class="math inline">\(E[\Delta_c]\le 0\)</span> (no benefit over capacity-matched conventional GNNs). <strong>H1:</strong> <span class="math inline">\(E[\Delta_c]\ge 0.02\)</span> (smallest effect of interest); <span class="math inline">\(0&lt;E[\Delta_c]&lt;0.02\)</span> does not support H1.</li>
+<li><strong>Decision rule:</strong> H1 is accepted at <span class="math inline">\(c\)</span> if the 95% <span class="math inline">\(t\)</span>-interval of <span class="math inline">\(\Delta_c\)</span> lies above 0 and its mean is ≥0.02 (a pragmatic rule, not a formal minimum-effect test; no multiplicity correction). The contribution is <em>supported</em> only if H1 holds in ≥4 of 6 conditions <strong>and</strong> RA-SCM’s FPR at 50% iid loss exceeds the best conventional GNN’s (implemented as the lowest of the four) by at most 0.02.</li>
+<li><strong>What disproves the idea:</strong> the interval of <span class="math inline">\(\Delta_c\)</span> contains 0 or is negative in ≥3 conditions; or the AoI-aware physics test is at least as good as RA-SCM on <span class="math inline">\(C^*\)</span>; or ablations show that the gain comes from edge conditioning, not from maps or reliability weights (MPNN-E ≈ RA-SCM).</li>
+<li><strong>Timing.</strong> The per-condition criterion was committed with the analysis code before the results. <span class="math inline">\(C^*\)</span>, the ≥4-of-6 aggregation, the FPR clause and the falsification clauses were fixed before RA-SCM results were inspected but committed together with the results, so their timing cannot be verified from the repository.</li>
+<li><strong>Bias, overfitting, alternatives, reproducibility:</strong> frozen operating point, disjoint seed ranges, paired seeds, capacity matching, tuning on a separate seed, identical inputs, ablations for parameter and information confounds, fixed seeds and configs. <strong>Negative results</strong> would still show where reliability-aware sheaf modelling does not pay.</li>
 </ul>
 <h2 id="results-obtained-and-expected-impact">9. Results obtained and expected impact</h2>
-<p>All numbers below are produced by the repository pipeline (<code>experiments/run_main.py</code>, 5 seeds, 26 test conditions × 40 episodes, positive rate 0.094 = chance PR-AUC) and inserted into this report automatically from <code>results/tables/</code>. Hardware: Apple M1, 8 logical cores, 16 GB RAM, CPU only. <strong>These are synthetic-simulation results; they do not demonstrate real-world UAV performance.</strong> Figures are in Appendix A.</p>
+<p>All result numbers are produced by the repository pipeline (5 seeds, 26 conditions × 40 test episodes) and inserted automatically from <code>results/tables/</code>. The positive rate (= chance PR-AUC) is 0.094 in the conditions of Tables 3–5 and 0.045–0.176 elsewhere (20 vs 5 UAVs). Hardware: Apple M1, 8 logical cores, 16 GB RAM. <strong>These are synthetic-simulation results; they do not demonstrate real-world UAV performance.</strong></p>
 <table>
-<colgroup>
-<col style="width: 12%" />
-<col style="width: 12%" />
-<col style="width: 12%" />
-<col style="width: 12%" />
-<col style="width: 12%" />
-<col style="width: 12%" />
-<col style="width: 12%" />
-<col style="width: 12%" />
-</colgroup>
 <thead>
 <tr class="header">
 <th style="text-align: left;">PR-AUC</th>
@@ -257,7 +322,7 @@ Mehmet Ünlü (040230253) · unlu23@itu.edu.tr · Istanbul Technical University,
 <td style="text-align: right;">0.961 ±.016</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">GCN (drop lost)</td>
+<td style="text-align: left;">GCN-drop</td>
 <td style="text-align: right;">0.965 ±.014</td>
 <td style="text-align: right;">0.959 ±.016</td>
 <td style="text-align: right;">0.949 ±.019</td>
@@ -298,16 +363,10 @@ Mehmet Ünlü (040230253) · unlu23@itu.edu.tr · Istanbul Technical University,
 </tr>
 </tbody>
 </table>
-<p><em>Table 3. PR-AUC, mean ± 95% <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>-interval half-width over 5 seeds (E1–E4). Chance level = 0.094.</em></p>
-<p><strong>Confusion between missing and wrong information is real in the simulator, and mostly a bookkeeping problem (E2–E4).</strong> A consistency test that treats stale reports as current keeps 0.894 PR-AUC without loss, but falls to 0.519 under 50% burst loss and 0.389 under receiver-correlated loss. Modelling the age of the report (AoI-aware physics) removes most of this damage (0.877 and 0.885). Under <em>iid</em> loss the naive test degrades less (0.804 at 50%); a plausible but untested explanation is that stale errors are common-mode in a rigidly moving formation and largely cancel in the symmetric statistic.</p>
-<p><strong>Learned graph models beat both physics tests; RA-SCM has the highest mean in every column of Table 3, but by small margins (E1–E4).</strong> With identical inputs, GCN, GAT, GCN-drop and the NSD-style sheaf reach 0.960–0.968 without loss versus 0.894 for physics; RA-SCM reaches 0.974. Its PR-AUC changes by +0.001 from 0% to 50% iid loss and -0.007 under 50% bursts, versus -0.059 (GAT), -0.072 (GCN) and -0.026 (GCN-drop). Table 4 gives the pre-specified test.</p>
+<p><em>Table 3. PR-AUC, mean ± 95% <span class="math inline">\(t\)</span>-interval half-width over 5 seeds (E1–E4). Chance level = 0.094.</em></p>
+<p><strong>Missing versus wrong information is a real confusion in the simulator, and mostly a bookkeeping problem (E2–E4).</strong> A test that treats stale reports as current keeps 0.894 without loss but falls to 0.519 under 50% bursts (Figure A2) and 0.389 under rx-burst loss; modelling the age of the report (AoI-aware physics) removes most of the damage (0.877, 0.885). Under iid loss the naive test degrades less (0.804 at 50%), plausibly because stale errors of a rigidly moving formation are common-mode and cancel (untested).</p>
+<p><strong>Learned graph models beat both physics tests; RA-SCM has the highest mean in every column of Table 3, by small margins.</strong> With identical inputs the conventional GNNs reach 0.960–0.968 without loss (physics 0.894; RA-SCM 0.974). From 0% to 50% bursts RA-SCM changes by −0.007, against −0.059 (GAT), −0.072 (GCN) and −0.026 (GCN-drop). Table 4 gives the pre-specified test (plotted in Figure A3; precision–recall curves in Figure A7).</p>
 <table>
-<colgroup>
-<col style="width: 23%" />
-<col style="width: 23%" />
-<col style="width: 30%" />
-<col style="width: 23%" />
-</colgroup>
 <thead>
 <tr class="header">
 <th style="text-align: left;">condition</th>
@@ -318,63 +377,290 @@ Mehmet Ünlü (040230253) · unlu23@itu.edu.tr · Istanbul Technical University,
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">iid_30</td>
-<td style="text-align: left;">+0.005 [-0.006, +0.016]</td>
+<td style="text-align: left;">iid 30%</td>
+<td style="text-align: left;">+0.005 [−0.006, +0.016]</td>
 <td style="text-align: center;">no</td>
 <td style="text-align: left;">+0.084 [+0.054, +0.113]</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">iid_50</td>
-<td style="text-align: left;">+0.013 [-0.004, +0.029]</td>
+<td style="text-align: left;">iid 50%</td>
+<td style="text-align: left;">+0.013 [−0.004, +0.029]</td>
 <td style="text-align: center;">no</td>
 <td style="text-align: left;">+0.087 [+0.055, +0.119]</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">burst_30</td>
+<td style="text-align: left;">burst 30%</td>
 <td style="text-align: left;">+0.019 [+0.011, +0.026]</td>
 <td style="text-align: center;">no</td>
 <td style="text-align: left;">+0.087 [+0.056, +0.119]</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">burst_50</td>
+<td style="text-align: left;">burst 50%</td>
 <td style="text-align: left;">+0.028 [+0.013, +0.043]</td>
 <td style="text-align: center;">yes</td>
 <td style="text-align: left;">+0.090 [+0.059, +0.121]</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">nodeburst_30</td>
-<td style="text-align: left;">+0.007 [-0.008, +0.022]</td>
+<td style="text-align: left;">rx-burst 30%</td>
+<td style="text-align: left;">+0.007 [−0.008, +0.022]</td>
 <td style="text-align: center;">no</td>
 <td style="text-align: left;">+0.073 [+0.045, +0.101]</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">targeted_30</td>
-<td style="text-align: left;">+0.002 [-0.002, +0.006]</td>
+<td style="text-align: left;">targeted 30%</td>
+<td style="text-align: left;">+0.002 [−0.002, +0.006]</td>
 <td style="text-align: center;">no</td>
 <td style="text-align: left;">+0.098 [+0.075, +0.121]</td>
 </tr>
 </tbody>
 </table>
 <p><em>Table 4. Paired PR-AUC difference RA-SCM − reference (mean [95% CI over seeds]); H1 requires CI &gt; 0 and mean ≥ 0.02.</em></p>
-<p><strong>Decision.</strong> H1 is met in 1 of 6 conditions (≥4 required) and the interval contains 0 in 4 (≥3 falsifies). By the rule fixed beforehand, <strong>H1 is not supported and its falsification clause is met</strong>: RA-SCM is not shown to be a general improvement over the best of four capacity-matched conventional GNNs under packet loss. The reference is deliberately harsh (a per-seed maximum over four noisy models is biased upward relative to one pre-chosen baseline); against single baselines RA-SCM often has a positive interval (vs GCN at 50% bursts +0.078 [+0.049, +0.107]), but most margins stay below 0.02. <em>Post hoc observations that survive:</em> RA-SCM beats the AoI-aware physics test in 6 of 6 conditions (+0.090 [+0.059, +0.121] at 50% bursts); its advantage over the best conventional GNN is practically relevant only under 50% bursts (+0.028 [+0.013, +0.043]) and absent without loss (+0.002 [-0.011, +0.014]), which points to loss handling rather than raw capacity. The FPR clause is met (FPR at 50% iid loss 0.031 for RA-SCM, 0.029 for GAT).</p>
-<p><strong>Other experiments.</strong> <em>Noise (E2):</em> at ×3 noise all models lose accuracy (RA-SCM 0.896, NSD 0.894, GAT 0.883) and the frozen thresholds fail (FPR 0.133 for RA-SCM, 0.316 for GCN-drop). <em>Anomaly type (E4):</em> sudden jumps are nearly always detected; drift and spoofing are harder (spoof PR-AUC at 30% loss: RA-SCM 0.965, others 0.939–0.948). <em>Targeted blackout (E4):</em> it barely hurts any learned model (RA-SCM 0.988), because a UAV’s own residuals still carry evidence. <em>Generalisation (E5):</em> trained on 10-UAV swarms, all learned models transfer to 20 UAVs (RA-SCM 0.981), an unseen trajectory (0.976) and an unseen formation (0.975), but <strong>not to 5 UAVs</strong> (RA-SCM 0.830, GAT 0.839, GCN 0.841), where few neighbours give little evidence — consistent with the identifiability analysis. <em>Secondary metrics</em> (Table 5) use validation-fixed thresholds, so realised FPRs differ between models; the AoI-aware physics test is poorly calibrated by that rule (FPR 0.124 at 0% loss, target 0.05).</p>
+<p><strong>Decision.</strong> H1 is met in 1 of 6 conditions (≥4 required) and the interval contains 0 in 4 (≥3 falsifies): by the rule fixed beforehand, <strong>H1 is not supported and its falsification clause is met</strong>. The other two clauses are not met: RA-SCM beats the AoI-aware test in 6 of 6 conditions (+0.090 [+0.059, +0.121] at 50% bursts), and in the two burst conditions, the only ones where its interval lies above 0, MPNN-E is worse (+0.021 [+0.004, +0.037], +0.035 [+0.018, +0.052]; intervals include 0 elsewhere on <span class="math inline">\(C^*\)</span>). The reference is harsh (a per-seed maximum over four models is biased upward): against single baselines (post hoc, uncorrected) RA-SCM’s interval lies above 0 in 19 of 24 condition–baseline pairs on <span class="math inline">\(C^*\)</span> and the full H1 criterion holds in 13 (against GCN in 5 of 6, e.g. +0.078 [+0.049, +0.107] at 50% bursts). <em>Post hoc:</em> RA-SCM’s advantage over the best conventional GNN is practically relevant only under 50% bursts (+0.028 [+0.013, +0.043]) and absent without loss (+0.002 [−0.011, +0.014]), pointing to loss handling rather than capacity. The FPR clause is met (0.031 vs 0.029 for GCN, the lowest).</p>
+<p><strong>Other experiments.</strong></p>
+<ul>
+<li><em>Noise (E2):</em> at ×3 noise all models lose accuracy (RA-SCM 0.896, NSD 0.894, GAT 0.883) and the frozen thresholds fail (FPR 0.133 for RA-SCM, 0.316 for GCN-drop; Table B1).</li>
+<li><em>Anomaly type (E4):</em> sudden jumps are nearly always detected; drift and spoofing are harder (spoof at 30% loss: RA-SCM 0.965, conventional GNNs 0.936–0.948) and detected later (Figure A8).</li>
+<li><em>Targeted blackout (E4):</em> it hurts no learned model and helps those using per-link delivery state (from iid 30% on the same episodes: RA-SCM 0.975 → 0.988, GCN-drop 0.959 → 0.986), while the naive test falls (0.863 → 0.779). The extra loss coincides exactly with the anomaly and a third of training episodes contain it, so missing packets can themselves become anomaly evidence (fewer neighbours receiving the corrupted reports is another, untested explanation); the condition overstates detectability against an attacker who does not degrade its own links.</li>
+<li><em>Generalisation (E5, Figure A6):</em> trained on 10 UAVs, learned models transfer to 20 UAVs (RA-SCM 0.981), an unseen trajectory (0.976) and formation (0.975), but <strong>not to 5 UAVs</strong> (RA-SCM 0.830, GAT 0.839, GCN 0.841), where few neighbours give little evidence.</li>
+<li><em>Frozen-threshold metrics</em> (Table B1) differ partly because realised FPRs differ; the AoI-aware physics test is poorly calibrated by the validation rule (FPR 0.124 at 0% loss, target 0.05). <em>Cost</em> (Table B2, Figure A9): RA-SCM needs 0.18 ms per step at N = 10 versus 0.05 ms for GAT, and 10 min of training per seed.</li>
+</ul>
 <table>
-<colgroup>
-<col style="width: 12%" />
-<col style="width: 12%" />
-<col style="width: 12%" />
-<col style="width: 12%" />
-<col style="width: 12%" />
-<col style="width: 12%" />
-<col style="width: 12%" />
-<col style="width: 12%" />
-</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">removed component</th>
+<th style="text-align: right;">iid 0%</th>
+<th style="text-align: right;">iid 50%</th>
+<th style="text-align: right;">burst 50%</th>
+<th style="text-align: right;">rx-burst 30%</th>
+<th style="text-align: right;">targeted 30%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">− reliability info</td>
+<td style="text-align: right;">+0.008 [−0.003, +0.019]</td>
+<td style="text-align: right;">+0.026 [+0.009, +0.042]</td>
+<td style="text-align: right;">+0.088 [+0.051, +0.125]</td>
+<td style="text-align: right;">+0.044 [+0.021, +0.068]</td>
+<td style="text-align: right;">+0.017 [+0.011, +0.024]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">− reliability weights</td>
+<td style="text-align: right;">−0.003 [−0.017, +0.012]</td>
+<td style="text-align: right;">0.000 [−0.014, +0.013]</td>
+<td style="text-align: right;">+0.021 [+0.004, +0.038]</td>
+<td style="text-align: right;">+0.006 [−0.009, +0.022]</td>
+<td style="text-align: right;">+0.005 [−0.002, +0.011]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">− sheaf maps (F = I)</td>
+<td style="text-align: right;">+0.007 [−0.008, +0.022]</td>
+<td style="text-align: right;">+0.004 [−0.009, +0.017]</td>
+<td style="text-align: right;">+0.007 [−0.010, +0.023]</td>
+<td style="text-align: right;">+0.010 [−0.005, +0.024]</td>
+<td style="text-align: right;">0.000 [−0.004, +0.003]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">− temporal (GRU)</td>
+<td style="text-align: right;">+0.005 [−0.002, +0.012]</td>
+<td style="text-align: right;">+0.013 [−0.000, +0.027]</td>
+<td style="text-align: right;">+0.018 [+0.002, +0.035]</td>
+<td style="text-align: right;">+0.020 [+0.011, +0.029]</td>
+<td style="text-align: right;">+0.009 [+0.002, +0.016]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">− maps − weights (MPNN-E)</td>
+<td style="text-align: right;">+0.007 [−0.008, +0.023]</td>
+<td style="text-align: right;">+0.009 [−0.004, +0.021]</td>
+<td style="text-align: right;">+0.035 [+0.018, +0.052]</td>
+<td style="text-align: right;">+0.007 [−0.012, +0.027]</td>
+<td style="text-align: right;">+0.015 [−0.000, +0.031]</td>
+</tr>
+</tbody>
+</table>
+<p><em>Table 5. Ablations (E6, also Figure A4): paired PR-AUC difference full RA-SCM − ablated variant (mean [95% CI]); positive = the removed component helped.</em></p>
+<p><strong>Reading the ablations (exploratory beyond the MPNN-E clause).</strong> The reliability <em>channel</em> (delivery state, age, link quality, age-compensated residual) matters most: removing it costs +0.088 [+0.051, +0.125] under 50% bursts, leaving RA-SCM below all four conventional GNNs there (0.879 vs 0.889–0.939), and +0.044 [+0.021, +0.068] under rx-burst loss. Learned <em>weights</em> matter only under 50% bursts (+0.021 [+0.004, +0.038], just above 0.02; ≈0 in the other Table 5 conditions). <strong>Learned sheaf maps showed no measurable benefit:</strong> identity maps change PR-AUC by at most 0.010, with the interval including 0 in 5 of 5 conditions; with 5 UAVs the identity variant has a higher mean (−0.033 [−0.074, +0.008], interval includes 0) and MPNN-E is better than RA-SCM (−0.030 [−0.055, −0.005]). The GRU helps under bursts and at ×3 noise (0.758 without vs 0.896). MPNN-E is worse than RA-SCM under 50% bursts (+0.035 [+0.018, +0.052]), more than either single removal, so the experiment cannot separate maps from weights. The benefit under loss is best attributed to <em>how reliability metadata enters the model</em> (edge features and, under bursts, learned weights, with temporal memory), not to sheaf structure.</p>
+<p><strong>Threats to validity</strong> (besides Section 7). (i) Realised FPRs differ across models. (ii) RA-SCM consumes edge features directly, the baselines in aggregated form; MPNN-E partly addresses this, but a GAT with edge features was not run. (iii) Learning rates were tuned on one seed. (iv) Targeted blackout rewards models that read delivery state; it is not a test against an adaptive attacker.</p>
+<p><strong>Expected scientific impact.</strong> The outcome is a <em>controlled benchmark and a negative-leaning answer</em>: reliability-aware sheaf modelling is at best a small improvement over strong graph baselines, and the cheapest effective step is to model the age of the evidence. Researchers gain loss models and an age-aware control for evaluating swarm detectors; designers gain evidence on thresholds under degraded links. For society, a detector that does not mistake outages for attacks would reduce needless aborts of inspection and search-and-rescue swarms and make multi-UAV safety cases more credible. <em>Possible harms:</em> an adversary could pair spoofing with more selective link degradation than tested here, and a benchmark can encourage over-trust in simulated accuracy. <em>New questions:</em> threshold calibration under noise shift; detection with few neighbours; whether margins survive measured noise and loss traces; adaptive attackers; whether computed physical maps <span class="citation" data-cites="barbero2022connection">(Barbero et al. 2022)</span> can replace learned ones.</p>
+<h2 id="researchers-reflection">10. Researcher’s reflection</h2>
+<p><strong>1. The Skeptic — “this research is unnecessary.”</strong> In our controlled simulation a consistency test that treats stale reports as current falls from 0.894 to 0.519 PR-AUC under bursty loss (0.389 under rx-burst loss), and no detector we reviewed was tested with loss as a controlled confounder. The expert is partly right: an age-aware test restores most of the loss (0.877) and a plain GAT with the same inputs reaches 0.909; the sheaf machinery is not what fixes the problem. What is necessary is the controlled evaluation, not the architecture.</p>
+<p><strong>2. The Failure — “after a year the hypothesis is wrong.”</strong> By our own rule it already is, in its strong form. What remains: a reproducible benchmark with paired seeds and an age-aware control; the finding that the reliability channel carries the benefit (+0.088 [+0.051, +0.125] when removed) while learned maps show none; the limit for small swarms (5 UAVs: 0.830); the failure of frozen thresholds under noise shift; tested code and a dashboard.</p>
+<p><strong>3. The Originality — “remove everything borrowed.”</strong> Sheaf Laplacians, NSD-style layers, GCN/GAT, uncertainty weighting, Gilbert–Elliott loss, AoI and consistency tests are borrowed. What is ours: (a) framing the task as <em>confounded evidence</em> (missing versus wrong) with explicit observability conditions; (b) applying delayed-message semantics <span class="citation" data-cites="tolstaya2020learning">(Tolstaya et al. 2020)</span> uniformly to every architecture and extending them to lost packets, so comparisons cannot leak; (c) the protocol — loss as a controlled confounder, frozen operating point, paired seeds, age-aware physics control, component ablations; (d) the findings, including the negative ones. We do not claim a new algorithm.</p>
+<p><strong>4. The Reality — €500, one computer, three months.</strong> The minimum meaningful experiment is E3 (burst loss) with both physics tests, the four conventional GNNs and RA-SCM over five seeds; on the existing simulator it needs about 20 minutes of training per seed on one laptop (Table B2) at no hardware cost. From scratch: month 1 for literature, simulator and leakage tests; month 2 for logging loss traces (six ESP32 boards, ≈€60) and UWB/GNSS noise (≈€250) while building baselines; month 3 for fitting the channel and noise models, re-running E3 and writing. If RA-SCM’s margin over the best conventional GNN stays below 0.02 on fitted parameters, the negative conclusion stands.</p>
+<p><strong>5. The Intellectual Honesty — “strongest argument against.”</strong> A plain GAT with the same inputs comes within 0.01–0.06 PR-AUC of RA-SCM on <span class="math inline">\(C^*\)</span>; a 20-line age-aware test removes most of the damage of stale reports (though it stays 0.07–0.10 below RA-SCM); learned maps add nothing measurable; and simulator, baselines and model share one source. We would change our minds if, on measured loss and noise, RA-SCM beat the best conventional GNN by ≥0.02 with an interval above 0 in at least four conditions <em>and</em> the identity-map ablation fell behind by ≥0.01 — or, conversely, if the age-aware test matched the learned models on real traces.</p>
+<p><strong>Declaration of AI assistance (HW1 academic-integrity rules).</strong> The project was carried out with Claude Sonnet 5.5 (Anthropic) in Claude Code (27–30 October 2026), which proposed and ran the searches, summarised the papers, wrote the simulator, model, test and analysis code, ran the experiments, produced the figures and drafted the text, including first drafts of the reflection. A pre-submission check with Claude Opus 5.5 (6 November 2026) re-verified every reference against its DOI or arXiv record (and the full text where details are discussed), extended the search, recomputed the result numbers and led to the corrections in this version. “We” refers to the author working with this assistant. All result numbers (Tables 3–5, B1–B2 and every PR-AUC, FPR, difference and count in Sections 9–10) are inserted automatically from result files; design parameters are copied from <code>configs/default.yaml</code>. The author chose the problem, directed the work, reviewed the final text and remains responsible for verifying every claim and citation.</p>
+<h2 id="references">11. References</h2>
+<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="ref-asif2026temporal" class="csl-entry" role="doc-biblioentry">
+Asif, Md Sadek Hossain, Tanzila Khan, and Md. Mosaddek Khan. 2026. <span>“Temporal Sheaf Neural Networks with Dynamic Orthogonal Transport.”</span> arXiv preprint arXiv:2606.10071. <a href="https://arxiv.org/abs/2606.10071">https://arxiv.org/abs/2606.10071</a>.
+</div>
+<div id="ref-barbero2022connection" class="csl-entry" role="doc-biblioentry">
+Barbero, Federico, Cristian Bodnar, Haitz Sáez de Ocáriz Borde, Michael Bronstein, Petar Veličković, and Pietro Liò. 2022. <span>“Sheaf Neural Networks with Connection Laplacians.”</span> In <em>Proceedings of Machine Learning Research, Vol. 196 (ICML 2022 Workshop on Topology, Algebra, and Geometry in Machine Learning)</em>, 28–36. <a href="https://proceedings.mlr.press/v196/barbero22a.html">https://proceedings.mlr.press/v196/barbero22a.html</a>.
+</div>
+<div id="ref-bi2024detection" class="csl-entry" role="doc-biblioentry">
+Bi, Siguo, Kai Li, Shuyan Hu, Wei Ni, Cong Wang, and Xin Wang. 2024. <span>“Detection and Mitigation of Position Spoofing Attacks on Cooperative <span>UAV</span> Swarm Formations.”</span> <em>IEEE Transactions on Information Forensics and Security</em> 19: 1883–95. <a href="https://doi.org/10.1109/TIFS.2023.3341398">https://doi.org/10.1109/TIFS.2023.3341398</a>.
+</div>
+<div id="ref-bodnar2022neural" class="csl-entry" role="doc-biblioentry">
+Bodnar, Cristian, Francesco Di Giovanni, Benjamin Paul Chamberlain, Pietro Liò, and Michael M. Bronstein. 2022. <span>“Neural Sheaf Diffusion: A Topological Perspective on Heterophily and Oversmoothing in <span>GNN</span>s.”</span> In <em>Advances in Neural Information Processing Systems 35 (NeurIPS 2022)</em>, 18527–41. <a href="https://doi.org/10.52202/068431-1346">https://doi.org/10.52202/068431-1346</a>.
+</div>
+<div id="ref-brown1992baseline" class="csl-entry" role="doc-biblioentry">
+Brown, R. Grover. 1992. <span>“A Baseline <span>GPS</span> <span>RAIM</span> Scheme and a Note on the Equivalence of Three <span>RAIM</span> Methods.”</span> <em>Navigation</em> 39 (3): 301–16. <a href="https://doi.org/10.1002/j.2161-4296.1992.tb02278.x">https://doi.org/10.1002/j.2161-4296.1992.tb02278.x</a>.
+</div>
+<div id="ref-cao2026quality" class="csl-entry" role="doc-biblioentry">
+Cao, Yulong, Guhao Zhao, Yarong Wu, Hao Wang, and Yu Gong. 2026. <span>“Quality-Aware Distributed State Estimation for Multi-<span>UAV</span> Cooperative Localization Under Communication and Navigation Constraints.”</span> <em>Drones</em> 10 (6): 439. <a href="https://doi.org/10.3390/drones10060439">https://doi.org/10.3390/drones10060439</a>.
+</div>
+<div id="ref-chen2022cooperative" class="csl-entry" role="doc-biblioentry">
+Chen, Qifeng, Yunhe Meng, Song Li, and Yuxin Liao. 2022. <span>“Cooperative Fault Detection and Recovery in the <span>GNSS</span> Positioning of Mobile Agent Swarms Based on Relative Distance Measurements.”</span> <em>Chinese Journal of Aeronautics</em> 35 (5): 129–44. <a href="https://doi.org/10.1016/j.cja.2021.07.011">https://doi.org/10.1016/j.cja.2021.07.011</a>.
+</div>
+<div id="ref-cini2022filling" class="csl-entry" role="doc-biblioentry">
+Cini, Andrea, Ivan Marisca, and Cesare Alippi. 2022. <span>“Filling the <span class="nocase">G_ap_s</span>: Multivariate Time Series Imputation by Graph Neural Networks.”</span> In <em>International Conference on Learning Representations (ICLR)</em>. <a href="https://openreview.net/forum?id=kOu3-S3wJ7">https://openreview.net/forum?id=kOu3-S3wJ7</a>.
+</div>
+<div id="ref-dang2023graphic" class="csl-entry" role="doc-biblioentry">
+Dang, Yongchao, Alp Karakoc, and Riku Jäntti. 2023. <span>“Graphic Neural Network Based <span>GPS</span> Spoofing Detection for Cellular-Connected <span>UAV</span> Swarm.”</span> In <em>2023 IEEE 97th Vehicular Technology Conference (<span>VTC</span>2023-<span>Spring</span>)</em>, 1–6. <a href="https://doi.org/10.1109/VTC2023-Spring57618.2023.10200557">https://doi.org/10.1109/VTC2023-Spring57618.2023.10200557</a>.
+</div>
+<div id="ref-deng2021graph" class="csl-entry" role="doc-biblioentry">
+Deng, Ailin, and Bryan Hooi. 2021. <span>“Graph Neural Network-Based Anomaly Detection in Multivariate Time Series.”</span> <em>Proceedings of the AAAI Conference on Artificial Intelligence</em> 35 (5): 4027–35. <a href="https://doi.org/10.1609/aaai.v35i5.16523">https://doi.org/10.1609/aaai.v35i5.16523</a>.
+</div>
+<div id="ref-elliott1963estimates" class="csl-entry" role="doc-biblioentry">
+Elliott, E. O. 1963. <span>“Estimates of Error Rates for Codes on Burst-Noise Channels.”</span> <em>Bell System Technical Journal</em> 42 (5): 1977–97. <a href="https://doi.org/10.1002/j.1538-7305.1963.tb00955.x">https://doi.org/10.1002/j.1538-7305.1963.tb00955.x</a>.
+</div>
+<div id="ref-gilbert1960capacity" class="csl-entry" role="doc-biblioentry">
+Gilbert, E. N. 1960. <span>“Capacity of a Burst-Noise Channel.”</span> <em>Bell System Technical Journal</em> 39 (5): 1253–65. <a href="https://doi.org/10.1002/j.1538-7305.1960.tb03959.x">https://doi.org/10.1002/j.1538-7305.1960.tb03959.x</a>.
+</div>
+<div id="ref-hanks2025distributed" class="csl-entry" role="doc-biblioentry">
+Hanks, Tyler, Hans Riess, Samuel Cohen, Trevor Gross, Matthew Hale, and James Fairbanks. 2025. <span>“Distributed Multi-Agent Coordination over Cellular Sheaves.”</span> arXiv preprint arXiv:2504.02049. <a href="https://arxiv.org/abs/2504.02049">https://arxiv.org/abs/2504.02049</a>.
+</div>
+<div id="ref-hansen2020sheaf" class="csl-entry" role="doc-biblioentry">
+Hansen, Jakob, and Thomas Gebhart. 2020. <span>“Sheaf Neural Networks.”</span> NeurIPS 2020 Workshop on Topological Data Analysis and Beyond; arXiv:2012.06333. <a href="https://arxiv.org/abs/2012.06333">https://arxiv.org/abs/2012.06333</a>.
+</div>
+<div id="ref-hansen2019spectral" class="csl-entry" role="doc-biblioentry">
+Hansen, Jakob, and Robert Ghrist. 2019. <span>“Toward a Spectral Theory of Cellular Sheaves.”</span> <em>Journal of Applied and Computational Topology</em> 3 (4): 315–58. <a href="https://doi.org/10.1007/s41468-019-00038-7">https://doi.org/10.1007/s41468-019-00038-7</a>.
+</div>
+<div id="ref-hayat2016survey" class="csl-entry" role="doc-biblioentry">
+Hayat, Samira, Evsen Yanmaz, and Raheeb Muzaffar. 2016. <span>“Survey on Unmanned Aerial Vehicle Networks for Civil Applications: A Communications Viewpoint.”</span> <em>IEEE Communications Surveys &amp; Tutorials</em> 18 (4): 2624–61. <a href="https://doi.org/10.1109/COMST.2016.2560343">https://doi.org/10.1109/COMST.2016.2560343</a>.
+</div>
+<div id="ref-he2024robust" class="csl-entry" role="doc-biblioentry">
+He, Ronghai, Yunxiao Shan, and Kai Huang. 2024. <span>“Robust Cooperative Localization with Failed Communication and Biased Measurements.”</span> <em>IEEE Robotics and Automation Letters</em> 9 (3): 2997–3004. <a href="https://doi.org/10.1109/LRA.2024.3362682">https://doi.org/10.1109/LRA.2024.3362682</a>.
+</div>
+<div id="ref-hernandez2026sheaf" class="csl-entry" role="doc-biblioentry">
+Hernández, Manuel, and Eduardo Sánchez-Soto. 2026. <span>“The Sheaf Laplacian: A Topological Framework for Data Fusion and Consensus in Distributed Sensing Networks.”</span> arXiv preprint arXiv:2606.19529. <a href="https://arxiv.org/abs/2606.19529">https://arxiv.org/abs/2606.19529</a>.
+</div>
+<div id="ref-joslyn2020sheaf" class="csl-entry" role="doc-biblioentry">
+Joslyn, Cliff A., Lauren Charles, Chris DePerno, Nicholas Gould, Kathleen Nowak, Brenda Praggastis, Emilie Purvine, Michael Robinson, Jennifer Strules, and Paul Whitney. 2020. <span>“A Sheaf Theoretical Approach to Uncertainty Quantification of Heterogeneous Geolocation Information.”</span> <em>Sensors</em> 20 (12): 3418. <a href="https://doi.org/10.3390/s20123418">https://doi.org/10.3390/s20123418</a>.
+</div>
+<div id="ref-julier1997nondivergent" class="csl-entry" role="doc-biblioentry">
+Julier, Simon J., and Jeffrey K. Uhlmann. 1997. <span>“A Non-Divergent Estimation Algorithm in the Presence of Unknown Correlations.”</span> In <em>Proceedings of the 1997 American Control Conference</em>, 4:2369–73. <a href="https://doi.org/10.1109/ACC.1997.609105">https://doi.org/10.1109/ACC.1997.609105</a>.
+</div>
+<div id="ref-kargartasooji2025distributed" class="csl-entry" role="doc-biblioentry">
+Kargar Tasooji, Tohid, and Ramviyas Parasuraman. 2025. <span>“Distributed Fault-Tolerant Multi-Robot Cooperative Localization in Adversarial Environments.”</span> In <em>2025 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)</em>, 4626–33. <a href="https://doi.org/10.1109/IROS60139.2025.11246042">https://doi.org/10.1109/IROS60139.2025.11246042</a>.
+</div>
+<div id="ref-kaul2012realtime" class="csl-entry" role="doc-biblioentry">
+Kaul, Sanjit, Roy Yates, and Marco Gruteser. 2012. <span>“Real-Time Status: How Often Should One Update?”</span> In <em>2012 Proceedings IEEE INFOCOM</em>, 2731–35. <a href="https://doi.org/10.1109/INFCOM.2012.6195689">https://doi.org/10.1109/INFCOM.2012.6195689</a>.
+</div>
+<div id="ref-kerns2014unmanned" class="csl-entry" role="doc-biblioentry">
+Kerns, Andrew J., Daniel P. Shepard, Jahshan A. Bhatti, and Todd E. Humphreys. 2014. <span>“Unmanned Aircraft Capture and Control via <span>GPS</span> Spoofing.”</span> <em>Journal of Field Robotics</em> 31 (4): 617–36. <a href="https://doi.org/10.1002/rob.21513">https://doi.org/10.1002/rob.21513</a>.
+</div>
+<div id="ref-kipf2017semi" class="csl-entry" role="doc-biblioentry">
+Kipf, Thomas N., and Max Welling. 2017. <span>“Semi-Supervised Classification with Graph Convolutional Networks.”</span> In <em>International Conference on Learning Representations (ICLR)</em>. <a href="https://arxiv.org/abs/1609.02907">https://arxiv.org/abs/1609.02907</a>.
+</div>
+<div id="ref-michieletto2023robust" class="csl-entry" role="doc-biblioentry">
+Michieletto, Giulia, Francesco Formaggio, Angelo Cenedese, and Stefano Tomasin. 2023. <span>“Robust Localization for Secure Navigation of <span>UAV</span> Formations Under <span>GNSS</span> Spoofing Attack.”</span> <em>IEEE Transactions on Automation Science and Engineering</em> 20 (4): 2383–96. <a href="https://doi.org/10.1109/TASE.2022.3208662">https://doi.org/10.1109/TASE.2022.3208662</a>.
+</div>
+<div id="ref-moustafa2026finite" class="csl-entry" role="doc-biblioentry">
+Moustafa, Ahmed M., and Muhammad B. Abdelghany. 2026. <span>“Finite-Trace Cellular Sheaves for Validation and Estimation of Hybrid Dynamical Systems.”</span> <em>IEEE Control Systems Letters</em> 10: 1213–18. <a href="https://doi.org/10.1109/LCSYS.2026.3706025">https://doi.org/10.1109/LCSYS.2026.3706025</a>.
+</div>
+<div id="ref-mykytyn2023gps" class="csl-entry" role="doc-biblioentry">
+Mykytyn, Pavlo, Marcin Brzozowski, Zoya Dyka, and Peter Langendoerfer. 2023. <span>“<span>GPS</span>-Spoofing Attack Detection Mechanism for <span>UAV</span> Swarms.”</span> In <em>2023 12th Mediterranean Conference on Embedded Computing (MECO)</em>, 1–8. <a href="https://doi.org/10.1109/MECO58584.2023.10154998">https://doi.org/10.1109/MECO58584.2023.10154998</a>.
+</div>
+<div id="ref-ou2023fpecmv" class="csl-entry" role="doc-biblioentry">
+Ou, Rong, Guanqi Liang, and Tin Lun Lam. 2023. <span>“<span>FPECMV</span>: Learning-Based Fault-Tolerant Collaborative Localization Under Limited Connectivity.”</span> In <em>2023 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)</em>, 11095–102. <a href="https://doi.org/10.1109/IROS55552.2023.10342426">https://doi.org/10.1109/IROS55552.2023.10342426</a>.
+</div>
+<div id="ref-pan2026satellite" class="csl-entry" role="doc-biblioentry">
+Pan, Jianxiong, Qiaolin Ouyang, Zhenmin Lin, Tucheng Hao, Wenyue Li, Xiangming Li, and Neng Ye. 2026. <span>“Satellite-Aided Multi-<span>UAV</span> Secure Collaborative Localization via Spatio-Temporal Anomaly Detection and Diagnosis.”</span> <em>Drones</em> 10 (1): 53. <a href="https://doi.org/10.3390/drones10010053">https://doi.org/10.3390/drones10010053</a>.
+</div>
+<div id="ref-park2026rigid" class="csl-entry" role="doc-biblioentry">
+Park, Minseok, and Joon Soo Yoo. 2026. <span>“Rigid-Covert <span>GNSS</span> Spoofing of <span>UAV</span> Swarms: A Structural Blind Spot, Its Detection Limit, and Absolute-Anchor Defenses.”</span> arXiv preprint arXiv:2608.06885. <a href="https://arxiv.org/abs/2608.06885">https://arxiv.org/abs/2608.06885</a>.
+</div>
+<div id="ref-ribeiro2025cooperative" class="csl-entry" role="doc-biblioentry">
+Ribeiro, André, Ana Luiza Tenório, Juan Belieni, Amauri H. Souza, and Diego Mesquita. 2026. <span>“Cooperative Sheaf Neural Networks.”</span> In <em>International Conference on Learning Representations (ICLR 2026)</em>. <a href="https://openreview.net/forum?id=AHpexliCTM">https://openreview.net/forum?id=AHpexliCTM</a>.
+</div>
+<div id="ref-robinson2017sheaves" class="csl-entry" role="doc-biblioentry">
+Robinson, Michael. 2017. <span>“Sheaves Are the Canonical Data Structure for Sensor Integration.”</span> <em>Information Fusion</em> 36: 208–24. <a href="https://doi.org/10.1016/j.inffus.2016.12.002">https://doi.org/10.1016/j.inffus.2016.12.002</a>.
+</div>
+<div id="ref-sinopoli2004kalman" class="csl-entry" role="doc-biblioentry">
+Sinopoli, Bruno, Luca Schenato, Massimo Franceschetti, Kameshwar Poolla, Michael I. Jordan, and Shankar S. Sastry. 2004. <span>“Kalman Filtering with Intermittent Observations.”</span> <em>IEEE Transactions on Automatic Control</em> 49 (9): 1453–64. <a href="https://doi.org/10.1109/TAC.2004.834121">https://doi.org/10.1109/TAC.2004.834121</a>.
+</div>
+<div id="ref-sophia2026zerotrust" class="csl-entry" role="doc-biblioentry">
+Sophia, S., P. Getzi Jeba Leelipushpam, Immanuel JohnRaja Jebadurai, and V. Ebenezer. 2026. <span>“Zero-Trust Graph-Attentive Intelligence for <span>Byzantine</span>-Resilient <span>UAV</span> Swarms Under Communication Constraints.”</span> <em>Discover Electronics</em> 3 (1): 154. <a href="https://doi.org/10.1007/s44291-026-00305-9">https://doi.org/10.1007/s44291-026-00305-9</a>.
+</div>
+<div id="ref-tariq2026tristream" class="csl-entry" role="doc-biblioentry">
+Tariq, Usman, Tariq Ahamed Ahanger, and Kamran Shaukat. 2026. <span>“Tri-Stream Multi-Model Architecture for Real-Time Detection of <span>BeiDou</span> Signal Manipulation in <span>UAV</span> Swarms.”</span> <em>Scientific Reports</em> 16: 15802. <a href="https://doi.org/10.1038/s41598-026-46655-y">https://doi.org/10.1038/s41598-026-46655-y</a>.
+</div>
+<div id="ref-tariq2026mission" class="csl-entry" role="doc-biblioentry">
+Tariq, Usman, and Kamran Shaukat. 2026. <span>“Mission-Aware <span>BeiDou</span> Spoofing Defense in <span>UAV</span> Swarms with <span>LLM</span>-Assisted Context Validation.”</span> <em>Frontiers in Communications and Networks</em> 7: 1760543. <a href="https://doi.org/10.3389/frcmn.2026.1760543">https://doi.org/10.3389/frcmn.2026.1760543</a>.
+</div>
+<div id="ref-tippenhauer2011requirements" class="csl-entry" role="doc-biblioentry">
+Tippenhauer, Nils Ole, Christina Pöpper, Kasper Bonne Rasmussen, and Srdjan Capkun. 2011. <span>“On the Requirements for Successful <span>GPS</span> Spoofing Attacks.”</span> In <em>Proceedings of the 18th ACM Conference on Computer and Communications Security (CCS)</em>, 75–86. <a href="https://doi.org/10.1145/2046707.2046719">https://doi.org/10.1145/2046707.2046719</a>.
+</div>
+<div id="ref-tolstaya2020learning" class="csl-entry" role="doc-biblioentry">
+Tolstaya, Ekaterina, Fernando Gama, James Paulos, George Pappas, Vijay Kumar, and Alejandro Ribeiro. 2020. <span>“Learning Decentralized Controllers for Robot Swarms with Graph Neural Networks.”</span> In <em>Proceedings of the Conference on Robot Learning (CoRL), PMLR 100</em>, 671–82. <a href="https://proceedings.mlr.press/v100/tolstaya20a.html">https://proceedings.mlr.press/v100/tolstaya20a.html</a>.
+</div>
+<div id="ref-velickovic2018graph" class="csl-entry" role="doc-biblioentry">
+Veličković, Petar, Guillem Cucurull, Arantxa Casanova, Adriana Romero, Pietro Liò, and Yoshua Bengio. 2018. <span>“Graph Attention Networks.”</span> In <em>International Conference on Learning Representations (ICLR)</em>. <a href="https://arxiv.org/abs/1710.10903">https://arxiv.org/abs/1710.10903</a>.
+</div>
+<div id="ref-vijay2025range" class="csl-entry" role="doc-biblioentry">
+Vijay, Vishnu, Kartik A. Pant, Minhyun Cho, Yifan Guo, James M. Goppert, and Inseok Hwang. 2025. <span>“Range-Based Multi-Robot Integrity Monitoring for Cyberattacks and Faults: An Anchor-Free Approach.”</span> <em>IEEE Robotics and Automation Letters</em> 10 (3): 2630–37. <a href="https://doi.org/10.1109/LRA.2025.3534068">https://doi.org/10.1109/LRA.2025.3534068</a>.
+</div>
+<div id="ref-willsky1976survey" class="csl-entry" role="doc-biblioentry">
+Willsky, Alan S. 1976. <span>“A Survey of Design Methods for Failure Detection in Dynamic Systems.”</span> <em>Automatica</em> 12 (6): 601–11. <a href="https://doi.org/10.1016/0005-1098(76)90041-8">https://doi.org/10.1016/0005-1098(76)90041-8</a>.
+</div>
+<div id="ref-zaghen2024nonlinear" class="csl-entry" role="doc-biblioentry">
+Zaghen, Olga, Antonio Longa, Steve Azzolin, Lev Telyatnikov, Andrea Passerini, and Pietro Liò. 2024. <span>“Sheaf Diffusion Goes Nonlinear: Enhancing <span>GNN</span>s with Adaptive Sheaf <span>L</span>aplacians.”</span> In <em>Proceedings of Machine Learning Research, Vol. 251 (Geometry-Grounded Representation Learning and Generative Modeling Workshop (GRaM) at ICML 2024)</em>, 264–76. <a href="https://proceedings.mlr.press/v251/zaghen24a.html">https://proceedings.mlr.press/v251/zaghen24a.html</a>.
+</div>
+<div id="ref-zhu2019robust" class="csl-entry" role="doc-biblioentry">
+Zhu, Dingyuan, Ziwei Zhang, Peng Cui, and Wenwu Zhu. 2019. <span>“Robust Graph Convolutional Networks Against Adversarial Attacks.”</span> In <em>Proceedings of the 25th ACM SIGKDD International Conference on Knowledge Discovery &amp; Data Mining (KDD ’19)</em>, 1399–1407. <a href="https://doi.org/10.1145/3292500.3330851">https://doi.org/10.1145/3292500.3330851</a>.
+</div>
+</div>
+<div class="pagebreak">
+
+</div>
+<h2 id="appendix-a.-figures-optional-visuals-not-counted-in-the-page-limit">Appendix A. Figures (optional visuals, not counted in the page limit)</h2>
+<figure>
+<img src="figures/fig_architecture.png" style="width:100.0%" alt="Figure A1. Architecture and information flow. Simulator ground truth never crosses the observation barrier; RA-SCM consumes node and edge features and reads neighbour states from the time of the last delivered packet." /><figcaption aria-hidden="true"><strong>Figure A1.</strong> Architecture and information flow. Simulator ground truth never crosses the observation barrier; RA-SCM consumes node and edge features and reads neighbour states from the time of the last delivered packet.</figcaption>
+</figure>
+<figure>
+<img src="figures/fig_pr_auc_vs_loss.png" style="width:86.0%" alt="Figure A2. PR-AUC versus packet loss (mean ± 95% interval over 5 seeds); top: full range, bottom: zoom on the learned models." /><figcaption aria-hidden="true"><strong>Figure A2.</strong> PR-AUC versus packet loss (mean ± 95% interval over 5 seeds); top: full range, bottom: zoom on the learned models.</figcaption>
+</figure>
+<figure>
+<img src="figures/fig_hypothesis_forest.png" style="width:88.0%" alt="Figure A3. Paired PR-AUC difference RA-SCM − reference with 95% intervals. Blue: interval above 0 and mean ≥ 0.02 (in the left panel the pre-specified H1 criterion; shaded band 0–0.02); grey: inconclusive. The rows iid 0% and 20 UAVs are shown for context and are not part of C^*." /><figcaption aria-hidden="true"><strong>Figure A3.</strong> Paired PR-AUC difference RA-SCM − reference with 95% intervals. Blue: interval above 0 and mean ≥ 0.02 (in the left panel the pre-specified H1 criterion; shaded band 0–0.02); grey: inconclusive. The rows iid 0% and 20 UAVs are shown for context and are not part of <span class="math inline">\(C^*\)</span>.</figcaption>
+</figure>
+<figure>
+<img src="figures/fig_ablation.png" style="width:70.0%" alt="Figure A4. Ablations: paired PR-AUC difference full RA-SCM − ablated variant (same conditions as Table 5)." /><figcaption aria-hidden="true"><strong>Figure A4.</strong> Ablations: paired PR-AUC difference full RA-SCM − ablated variant (same conditions as Table 5).</figcaption>
+</figure>
+<figure>
+<img src="figures/fig_fpr_vs_loss.png" style="width:75.0%" alt="Figure A5. False-positive rate at the threshold frozen on validation data (dotted line: 5% target)." /><figcaption aria-hidden="true"><strong>Figure A5.</strong> False-positive rate at the threshold frozen on validation data (dotted line: 5% target).</figcaption>
+</figure>
+<figure>
+<img src="figures/fig_generalization.png" style="width:80.0%" alt="Figure A6. PR-AUC under changed swarm size, unseen trajectory and unseen formation (loss 30%)." /><figcaption aria-hidden="true"><strong>Figure A6.</strong> PR-AUC under changed swarm size, unseen trajectory and unseen formation (loss 30%).</figcaption>
+</figure>
+<figure>
+<img src="figures/fig_pr_curves.png" style="width:100.0%" alt="Figure A7. Precision–recall curves (seed 0) for four conditions." /><figcaption aria-hidden="true"><strong>Figure A7.</strong> Precision–recall curves (seed 0) for four conditions.</figcaption>
+</figure>
+<figure>
+<img src="figures/fig_delay.png" style="width:85.0%" alt="Figure A8. Median detection delay by anomaly type. Filled circles: no loss; hollow triangles: 30% iid loss; delay over detected UAVs only." /><figcaption aria-hidden="true"><strong>Figure A8.</strong> Median detection delay by anomaly type. Filled circles: no loss; hollow triangles: 30% iid loss; delay over detected UAVs only.</figcaption>
+</figure>
+<figure>
+<img src="figures/fig_latency.png" style="width:80.0%" alt="Figure A9. Amortised CPU inference time (log scale; the two physics tests have identical cost) and parameter counts." /><figcaption aria-hidden="true"><strong>Figure A9.</strong> Amortised CPU inference time (log scale; the two physics tests have identical cost) and parameter counts.</figcaption>
+</figure>
+<h2 id="appendix-b.-supplementary-tables-optional-not-counted-in-the-page-limit">Appendix B. Supplementary tables (optional, not counted in the page limit)</h2>
+<table>
 <thead>
 <tr class="header">
 <th style="text-align: left;">model</th>
 <th style="text-align: right;">FPR iid 0%</th>
 <th style="text-align: right;">FPR iid 50%</th>
 <th style="text-align: right;">FPR burst 50%</th>
+<th style="text-align: right;">FPR noise ×3</th>
 <th style="text-align: right;">recall iid 50%</th>
 <th style="text-align: right;">recall burst 50%</th>
 <th style="text-align: right;">delay burst 50% [s]</th>
@@ -387,6 +673,7 @@ Mehmet Ünlü (040230253) · unlu23@itu.edu.tr · Istanbul Technical University,
 <td style="text-align: right;">0.038</td>
 <td style="text-align: right;">0.068</td>
 <td style="text-align: right;">0.196</td>
+<td style="text-align: right;">0.000</td>
 <td style="text-align: right;">0.847</td>
 <td style="text-align: right;">0.848</td>
 <td style="text-align: right;">2.10</td>
@@ -397,6 +684,7 @@ Mehmet Ünlü (040230253) · unlu23@itu.edu.tr · Istanbul Technical University,
 <td style="text-align: right;">0.124</td>
 <td style="text-align: right;">0.115</td>
 <td style="text-align: right;">0.101</td>
+<td style="text-align: right;">0.012</td>
 <td style="text-align: right;">0.940</td>
 <td style="text-align: right;">0.927</td>
 <td style="text-align: right;">1.40</td>
@@ -407,16 +695,18 @@ Mehmet Ünlü (040230253) · unlu23@itu.edu.tr · Istanbul Technical University,
 <td style="text-align: right;">0.015</td>
 <td style="text-align: right;">0.029</td>
 <td style="text-align: right;">0.075</td>
+<td style="text-align: right;">0.117</td>
 <td style="text-align: right;">0.932</td>
 <td style="text-align: right;">0.907</td>
 <td style="text-align: right;">1.50</td>
 <td style="text-align: right;">1.00</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">GCN (drop lost)</td>
+<td style="text-align: left;">GCN-drop</td>
 <td style="text-align: right;">0.021</td>
 <td style="text-align: right;">0.039</td>
 <td style="text-align: right;">0.054</td>
+<td style="text-align: right;">0.316</td>
 <td style="text-align: right;">0.944</td>
 <td style="text-align: right;">0.940</td>
 <td style="text-align: right;">1.10</td>
@@ -427,6 +717,7 @@ Mehmet Ünlü (040230253) · unlu23@itu.edu.tr · Istanbul Technical University,
 <td style="text-align: right;">0.020</td>
 <td style="text-align: right;">0.029</td>
 <td style="text-align: right;">0.074</td>
+<td style="text-align: right;">0.064</td>
 <td style="text-align: right;">0.942</td>
 <td style="text-align: right;">0.917</td>
 <td style="text-align: right;">1.35</td>
@@ -437,6 +728,7 @@ Mehmet Ünlü (040230253) · unlu23@itu.edu.tr · Istanbul Technical University,
 <td style="text-align: right;">0.019</td>
 <td style="text-align: right;">0.031</td>
 <td style="text-align: right;">0.070</td>
+<td style="text-align: right;">0.081</td>
 <td style="text-align: right;">0.942</td>
 <td style="text-align: right;">0.910</td>
 <td style="text-align: right;">1.60</td>
@@ -447,6 +739,7 @@ Mehmet Ünlü (040230253) · unlu23@itu.edu.tr · Istanbul Technical University,
 <td style="text-align: right;">0.032</td>
 <td style="text-align: right;">0.031</td>
 <td style="text-align: right;">0.041</td>
+<td style="text-align: right;">0.133</td>
 <td style="text-align: right;">0.969</td>
 <td style="text-align: right;">0.964</td>
 <td style="text-align: right;">0.50</td>
@@ -454,71 +747,7 @@ Mehmet Ünlü (040230253) · unlu23@itu.edu.tr · Istanbul Technical University,
 </tr>
 </tbody>
 </table>
-<p><em>Table 5. Frozen-threshold secondary metrics (means over seeds; delay is over detected UAVs only).</em></p>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 16%" />
-<col style="width: 16%" />
-<col style="width: 16%" />
-<col style="width: 16%" />
-<col style="width: 16%" />
-<col style="width: 16%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: left;"><strong>Ablations and cost (E6, E7).</strong></th>
-<th style="text-align: right;">removed component</th>
-<th style="text-align: right;">iid_0</th>
-<th style="text-align: right;">iid_50</th>
-<th style="text-align: right;">burst_50</th>
-<th style="text-align: right;">nodeburst_30</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">− reliability info</td>
-<td style="text-align: right;">+0.008 [-0.003, +0.019]</td>
-<td style="text-align: right;">+0.026 [+0.009, +0.042]</td>
-<td style="text-align: right;">+0.088 [+0.051, +0.125]</td>
-<td style="text-align: right;">+0.044 [+0.021, +0.068]</td>
-<td style="text-align: right;">+0.017 [+0.011, +0.024]</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">− reliability weights</td>
-<td style="text-align: right;">-0.003 [-0.017, +0.012]</td>
-<td style="text-align: right;">-0.000 [-0.014, +0.013]</td>
-<td style="text-align: right;">+0.021 [+0.004, +0.038]</td>
-<td style="text-align: right;">+0.006 [-0.009, +0.022]</td>
-<td style="text-align: right;">+0.005 [-0.002, +0.011]</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">− sheaf maps (F = I)</td>
-<td style="text-align: right;">+0.007 [-0.008, +0.022]</td>
-<td style="text-align: right;">+0.004 [-0.009, +0.017]</td>
-<td style="text-align: right;">+0.007 [-0.010, +0.023]</td>
-<td style="text-align: right;">+0.010 [-0.005, +0.024]</td>
-<td style="text-align: right;">-0.000 [-0.004, +0.003]</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">− temporal (GRU)</td>
-<td style="text-align: right;">+0.005 [-0.002, +0.012]</td>
-<td style="text-align: right;">+0.013 [-0.000, +0.027]</td>
-<td style="text-align: right;">+0.018 [+0.002, +0.035]</td>
-<td style="text-align: right;">+0.020 [+0.011, +0.029]</td>
-<td style="text-align: right;">+0.009 [+0.002, +0.016]</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">− maps − weights (MPNN-E)</td>
-<td style="text-align: right;">+0.007 [-0.008, +0.023]</td>
-<td style="text-align: right;">+0.009 [-0.004, +0.021]</td>
-<td style="text-align: right;">+0.035 [+0.018, +0.052]</td>
-<td style="text-align: right;">+0.007 [-0.012, +0.027]</td>
-<td style="text-align: right;">+0.015 [-0.000, +0.031]</td>
-</tr>
-</tbody>
-</table>
-<p><em>Table 6. Paired PR-AUC difference full RA-SCM − ablated variant (mean [95% CI]); positive = the removed component helped.</em></p>
-<p><strong>Reading the ablations (exploratory, not pre-specified).</strong> The reliability <em>channel</em> (delivery state, age, link quality, age-compensated residual) is what matters: removing it costs +0.088 [+0.051, +0.125] PR-AUC under 50% bursts and +0.044 [+0.021, +0.068] under receiver-correlated loss, leaving RA-SCM close to the conventional GNNs (0.879 vs GAT 0.909). Learned reliability <em>weights</em> add little once the features are present (50% bursts: +0.021 [+0.004, +0.038]; ≈0 elsewhere). <strong>Learned sheaf restriction maps showed no measurable benefit:</strong> replacing them by identity changes PR-AUC by at most 0.010 in the five conditions, with the interval including 0 in 5 of 5; for 5-UAV swarms the identity variant is even better (0.863 vs 0.830). The GRU helps under bursts and strongly at ×3 noise (0.758 without vs 0.896 with). The MPNN-E control is worse than RA-SCM under 50% bursts (+0.035 [+0.018, +0.052]), although each single removal is not, so maps and weights may act jointly; this experiment cannot separate them. Hence the benefit under loss is best attributed to <em>how reliability metadata enters the model</em> (edge-conditioned, with temporal memory), not to sheaf structure as such.</p>
+<p><em>Table B1. Frozen-threshold secondary metrics (means over seeds; delay over detected UAVs only).</em></p>
 <table>
 <thead>
 <tr class="header">
@@ -548,7 +777,7 @@ Mehmet Ünlü (040230253) · unlu23@itu.edu.tr · Istanbul Technical University,
 <td style="text-align: right;">1.1</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">GCN (drop lost)</td>
+<td style="text-align: left;">GCN-drop</td>
 <td style="text-align: right;">17425</td>
 <td style="text-align: left;">0.02 / 0.03 / 0.08</td>
 <td style="text-align: right;">0.9</td>
@@ -603,115 +832,6 @@ Mehmet Ünlü (040230253) · unlu23@itu.edu.tr · Istanbul Technical University,
 </tr>
 </tbody>
 </table>
-<p><em>Table 7. Parameters, amortised CPU inference time and training time. RA-SCM costs far more compute than GCN/GAT for a modest accuracy gain.</em></p>
-<p><strong>Threats to validity.</strong> (i) Simulator and physics baseline were written by the authors (benchmark bias; the nominal sensor specifications given to the physics tests may not match reality). (ii) Realised FPRs differ across models, which affects delay and recall comparisons. (iii) Five seeds give wide intervals; differences of 0.01 are unresolvable. (iv) RA-SCM consumes edge features directly, the baselines in aggregated form; MPNN-E partly addresses this, but a GAT with edge features was not run. (v) Learning rates were tuned on one seed with a small grid.</p>
-<p><strong>Expected scientific impact.</strong> The outcome is a <em>controlled benchmark and a negative-leaning answer</em>: reliability-aware sheaf modelling is at best a small improvement over strong graph baselines here, and the cheapest effective step is to model the age of the evidence. Beneficiaries are researchers who evaluate swarm detectors (they need loss models and age-aware controls) and designers who must set thresholds under degraded links. <em>Possible harms:</em> the targeted-blackout scenario shows how an adversary could pair spoofing with link degradation, and a benchmark can encourage over-trust in simulated accuracy. <em>New questions:</em> threshold calibration under noise shift (FPR inflation at ×3 noise); detection with very few neighbours; whether the margins survive real, non-Gaussian sensor noise and measured loss traces; adaptive attackers; whether <em>computed</em> physical maps <span class="citation" data-cites="barbero2022connection">(Barbero et al. 2022)</span> can replace learned ones.</p>
-<h2 id="references">10. References</h2>
-<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
-<div id="ref-asif2026temporal" class="csl-entry" role="doc-biblioentry">
-Asif, Md Sadek Hossain, Tanzila Khan, and Md. Mosaddek Khan. 2026. <span>“Temporal Sheaf Neural Networks with Dynamic Orthogonal Transport.”</span> <a href="https://arxiv.org/abs/2606.10071">https://arxiv.org/abs/2606.10071</a>.
-</div>
-<div id="ref-barbero2022connection" class="csl-entry" role="doc-biblioentry">
-Barbero, Federico, Cristian Bodnar, Haitz Sáez de Ocáriz Borde, Michael Bronstein, Petar Veličković, and Pietro Liò. 2022. <span>“Sheaf Neural Networks with Connection Laplacians.”</span> In <em>Proceedings of Machine Learning Research, Vol. 196 (ICML 2022 Workshop on Topology, Algebra, and Geometry in Machine Learning)</em>. <a href="https://proceedings.mlr.press/v196/barbero22a.html">https://proceedings.mlr.press/v196/barbero22a.html</a>.
-</div>
-<div id="ref-bi2024detection" class="csl-entry" role="doc-biblioentry">
-Bi, Siguo, Kai Li, Shuyan Hu, Wei Ni, Cong Wang, and Xin Wang. 2024. <span>“Detection and Mitigation of Position Spoofing Attacks on Cooperative <span>UAV</span> Swarm Formations.”</span> <em>IEEE Transactions on Information Forensics and Security</em> 19: 1883–95. <a href="https://doi.org/10.1109/TIFS.2023.3341398">https://doi.org/10.1109/TIFS.2023.3341398</a>.
-</div>
-<div id="ref-bodnar2022neural" class="csl-entry" role="doc-biblioentry">
-Bodnar, Cristian, Francesco Di Giovanni, Benjamin Paul Chamberlain, Pietro Liò, and Michael M. Bronstein. 2022. <span>“Neural Sheaf Diffusion: A Topological Perspective on Heterophily and Oversmoothing in <span>GNN</span>s.”</span> In <em>Advances in Neural Information Processing Systems 35 (NeurIPS 2022)</em>. <a href="https://papers.neurips.cc/paper_files/paper/2022/hash/75c45fca2aa416ada062b26cc4fb7641-Abstract-Conference.html">https://papers.neurips.cc/paper_files/paper/2022/hash/75c45fca2aa416ada062b26cc4fb7641-Abstract-Conference.html</a>.
-</div>
-<div id="ref-cini2022filling" class="csl-entry" role="doc-biblioentry">
-Cini, Andrea, Ivan Marisca, and Cesare Alippi. 2022. <span>“Filling the <span class="nocase">G_ap_s</span>: Multivariate Time Series Imputation by Graph Neural Networks.”</span> In <em>International Conference on Learning Representations (ICLR)</em>. <a href="https://openreview.net/forum?id=kOu3-S3wJ7">https://openreview.net/forum?id=kOu3-S3wJ7</a>.
-</div>
-<div id="ref-dang2023graphic" class="csl-entry" role="doc-biblioentry">
-Dang, Yongchao, Alp Karakoc, and Riku Jäntti. 2023. <span>“Graphic Neural Network Based <span>GPS</span> Spoofing Detection for Cellular-Connected <span>UAV</span> Swarm.”</span> In <em>2023 IEEE 97th Vehicular Technology Conference (Vtc2023-Spring)</em>, 1–6. <a href="https://doi.org/10.1109/VTC2023-Spring57618.2023.10200557">https://doi.org/10.1109/VTC2023-Spring57618.2023.10200557</a>.
-</div>
-<div id="ref-deng2021graph" class="csl-entry" role="doc-biblioentry">
-Deng, Ailin, and Bryan Hooi. 2021. <span>“Graph Neural Network-Based Anomaly Detection in Multivariate Time Series.”</span> In <em>Proceedings of the AAAI Conference on Artificial Intelligence</em>, 35:4027–35. 5. <a href="https://doi.org/10.1609/aaai.v35i5.16523">https://doi.org/10.1609/aaai.v35i5.16523</a>.
-</div>
-<div id="ref-elliott1963estimates" class="csl-entry" role="doc-biblioentry">
-Elliott, E. O. 1963. <span>“Estimates of Error Rates for Codes on Burst-Noise Channels.”</span> <em>Bell System Technical Journal</em> 42 (5): 1977–97. <a href="https://doi.org/10.1002/j.1538-7305.1963.tb00955.x">https://doi.org/10.1002/j.1538-7305.1963.tb00955.x</a>.
-</div>
-<div id="ref-gilbert1960capacity" class="csl-entry" role="doc-biblioentry">
-Gilbert, E. N. 1960. <span>“Capacity of a Burst-Noise Channel.”</span> <em>Bell System Technical Journal</em> 39 (5): 1253–65. <a href="https://doi.org/10.1002/j.1538-7305.1960.tb03959.x">https://doi.org/10.1002/j.1538-7305.1960.tb03959.x</a>.
-</div>
-<div id="ref-hanks2025distributed" class="csl-entry" role="doc-biblioentry">
-Hanks, Tyler, Hans Riess, Samuel Cohen, Trevor Gross, Matthew Hale, and James Fairbanks. 2025. <span>“Distributed Multi-Agent Coordination over Cellular Sheaves.”</span> <a href="https://arxiv.org/abs/2504.02049">https://arxiv.org/abs/2504.02049</a>.
-</div>
-<div id="ref-hansen2020sheaf" class="csl-entry" role="doc-biblioentry">
-Hansen, Jakob, and Thomas Gebhart. 2020. <span>“Sheaf Neural Networks.”</span> <a href="https://arxiv.org/abs/2012.06333">https://arxiv.org/abs/2012.06333</a>.
-</div>
-<div id="ref-hansen2019spectral" class="csl-entry" role="doc-biblioentry">
-Hansen, Jakob, and Robert Ghrist. 2019. <span>“Toward a Spectral Theory of Cellular Sheaves.”</span> <em>Journal of Applied and Computational Topology</em> 3 (4): 315–58. <a href="https://doi.org/10.1007/s41468-019-00038-7">https://doi.org/10.1007/s41468-019-00038-7</a>.
-</div>
-<div id="ref-hernandez2026sheaf" class="csl-entry" role="doc-biblioentry">
-Hernández, Manuel, and Eduardo Sánchez-Soto. 2026. <span>“The Sheaf Laplacian: A Topological Framework for Data Fusion and Consensus in Distributed Sensing Networks.”</span> <a href="https://arxiv.org/abs/2606.19529">https://arxiv.org/abs/2606.19529</a>.
-</div>
-<div id="ref-joslyn2020sheaf" class="csl-entry" role="doc-biblioentry">
-Joslyn, Cliff A., Lauren Charles, Chris DePerno, Nicholas Gould, Kathleen Nowak, Brenda Praggastis, Emilie Purvine, Michael Robinson, Jennifer Strules, and Paul Whitney. 2020. <span>“A Sheaf Theoretical Approach to Uncertainty Quantification of Heterogeneous Geolocation Information.”</span> <em>Sensors</em> 20 (12): 3418. <a href="https://doi.org/10.3390/s20123418">https://doi.org/10.3390/s20123418</a>.
-</div>
-<div id="ref-kipf2017semi" class="csl-entry" role="doc-biblioentry">
-Kipf, Thomas N., and Max Welling. 2017. <span>“Semi-Supervised Classification with Graph Convolutional Networks.”</span> In <em>International Conference on Learning Representations (ICLR)</em>. <a href="https://arxiv.org/abs/1609.02907">https://arxiv.org/abs/1609.02907</a>.
-</div>
-<div id="ref-mykytyn2023gps" class="csl-entry" role="doc-biblioentry">
-Mykytyn, Pavlo, Marcin Brzozowski, Zoya Dyka, and Peter Langendoerfer. 2023. <span>“<span>GPS</span>-Spoofing Attack Detection Mechanism for <span>UAV</span> Swarms.”</span> In <em>2023 12th Mediterranean Conference on Embedded Computing (MECO)</em>, 1–8. <a href="https://doi.org/10.1109/MECO58584.2023.10154998">https://doi.org/10.1109/MECO58584.2023.10154998</a>.
-</div>
-<div id="ref-ribeiro2025cooperative" class="csl-entry" role="doc-biblioentry">
-Ribeiro, André, Ana Luiza Tenório, Juan Belieni, Amauri H. Souza, and Diego Mesquita. 2025. <span>“Cooperative Sheaf Neural Networks.”</span> <a href="https://arxiv.org/abs/2507.00647">https://arxiv.org/abs/2507.00647</a>.
-</div>
-<div id="ref-robinson2017sheaves" class="csl-entry" role="doc-biblioentry">
-Robinson, Michael. 2017. <span>“Sheaves Are the Canonical Data Structure for Sensor Integration.”</span> <em>Information Fusion</em> 36: 208–24. <a href="https://doi.org/10.1016/j.inffus.2016.12.002">https://doi.org/10.1016/j.inffus.2016.12.002</a>.
-</div>
-<div id="ref-tolstaya2020learning" class="csl-entry" role="doc-biblioentry">
-Tolstaya, Ekaterina, Fernando Gama, James Paulos, George Pappas, Vijay Kumar, and Alejandro Ribeiro. 2020. <span>“Learning Decentralized Controllers for Robot Swarms with Graph Neural Networks.”</span> In <em>Proceedings of the Conference on Robot Learning (CoRL), PMLR 100</em>, 671–82. <a href="https://proceedings.mlr.press/v100/tolstaya20a.html">https://proceedings.mlr.press/v100/tolstaya20a.html</a>.
-</div>
-<div id="ref-velickovic2018graph" class="csl-entry" role="doc-biblioentry">
-Veličković, Petar, Guillem Cucurull, Arantxa Casanova, Adriana Romero, Pietro Liò, and Yoshua Bengio. 2018. <span>“Graph Attention Networks.”</span> In <em>International Conference on Learning Representations (ICLR)</em>. <a href="https://arxiv.org/abs/1710.10903">https://arxiv.org/abs/1710.10903</a>.
-</div>
-<div id="ref-zaghen2024nonlinear" class="csl-entry" role="doc-biblioentry">
-Zaghen, Olga, Antonio Longa, Steve Azzolin, Lev Telyatnikov, Andrea Passerini, and Pietro Liò. 2024. <span>“Sheaf Diffusion Goes Nonlinear: Enhancing <span>GNN</span>s with Adaptive Sheaf <span>L</span>aplacians.”</span> In <em>Proceedings of Machine Learning Research, Vol. 251 (GRaM Workshop, 2024)</em>. <a href="https://proceedings.mlr.press/v251/zaghen24a.html">https://proceedings.mlr.press/v251/zaghen24a.html</a>.
-</div>
-<div id="ref-zhu2019robust" class="csl-entry" role="doc-biblioentry">
-Zhu, Dingyuan, Ziwei Zhang, Peng Cui, and Wenwu Zhu. 2019. <span>“Robust Graph Convolutional Networks Against Adversarial Attacks.”</span> In <em>Proceedings of the 25th ACM SIGKDD International Conference on Knowledge Discovery &amp; Data Mining (KDD ’19)</em>, 1399–1407. <a href="https://doi.org/10.1145/3292500.3330851">https://doi.org/10.1145/3292500.3330851</a>.
-</div>
-</div>
-<h2 id="researchers-reflection">11. Researcher’s reflection</h2>
-<p><strong>1. The Skeptic — “this research is unnecessary.”</strong> In our controlled simulation a consistency test that treats stale reports as current falls from 0.894 to 0.519 PR-AUC under bursty loss (0.389 under receiver-correlated loss), while the swarm detectors we reviewed assume reliable delivery or trust the communication topology. So the confusion is real <em>in simulation</em>. The expert is partly right, though: an age-aware test restores most of the loss (0.877) and a plain GAT with the same inputs reaches 0.909; the sheaf machinery is not what fixes the problem. What is necessary is the controlled evaluation, not the architecture.</p>
-<p><strong>2. The Failure — “after a year the hypothesis is wrong.”</strong> By our own pre-specified rule it is already wrong in its strong form. What remains: a reproducible benchmark with paired seeds and an age-aware control; the finding that the reliability channel carries the benefit (+0.088 [+0.051, +0.125] when removed) while learned sheaf maps show none; the identifiability limit for small swarms (5 UAVs: 0.830); the failure of mixed-condition thresholds under noise shift; tested code and a dashboard.</p>
-<p><strong>3. The Originality — “remove everything borrowed.”</strong> Sheaf Laplacians, NSD-style layers, GCN/GAT, uncertainty weighting, Gilbert–Elliott loss and physical consistency tests are all borrowed. What is ours: (a) framing the task as <em>confounded evidence</em> (missing versus wrong) with explicit observability conditions; (b) delayed-message semantics that make every architecture read only communicated information, so comparisons cannot leak; (c) the protocol — loss, burst and targeted-blackout confounding, frozen operating point, paired seeds, age-aware physics control, component ablations; (d) the empirical findings, including the negative ones. We do not claim a new algorithm.</p>
-<p><strong>4. The Reality — €500, one computer, three months.</strong> The experiments reported here ran on one CPU laptop (56 min of training per seed, five seeds in parallel) and cost no hardware money. With €500 the most meaningful addition is calibration: measure real packet-loss traces (ESP32 boards, ≈€60), UWB ranging and GNSS noise (≈€250) and re-run E1–E4 with fitted parameters. The first month would go to literature and tests, the second to the simulator and baselines, the third to experiments and writing.</p>
-<p><strong>5. The Intellectual Honesty — “strongest argument against.”</strong> A 20-line age-aware physics test or a plain GAT with the same inputs does nearly as well, learned sheaf maps add nothing measurable, and the simulator and baselines were written by the same people who designed the proposed model. I would change my mind if, on measured loss and sensor noise, RA-SCM beat the best conventional GNN by ≥0.02 with an interval above 0 in at least four conditions <em>and</em> the identity-map ablation fell behind by ≥0.01 — or, in the opposite direction, if the age-aware physics test matched the learned models on real traces.</p>
-<p><strong>AI assistance (declared as required by the academic-integrity section of the HW1 brief).</strong> An AI model (Claude Sonnet 5.5 via Claude Code) was used for literature-search queries, code, experiment orchestration, figures and drafting. Bibliographic records were machine-checked against the arXiv API, Crossref and publisher pages; full-text reading covered key sections of three UAV papers only, the rest at abstract level plus background knowledge, as flagged in the literature matrix. All numbers in this report are inserted from result files produced by the repository code. The author remains responsible for verifying every claim and citation before submission.</p>
-<div class="pagebreak">
-
-</div>
-<h2 id="appendix-a.-figures-optional-visuals-not-counted-in-the-page-limit">Appendix A. Figures (optional visuals, not counted in the page limit)</h2>
-<figure>
-<img src="figures/fig_architecture.png" style="width:100.0%" alt="Figure A1. Architecture and information flow. Simulator ground truth never crosses the observation barrier; RA-SCM consumes node and edge features and reads neighbour states from the time of the last delivered packet." /><figcaption aria-hidden="true"><strong>Figure A1.</strong> Architecture and information flow. Simulator ground truth never crosses the observation barrier; RA-SCM consumes node and edge features and reads neighbour states from the time of the last delivered packet.</figcaption>
-</figure>
-<figure>
-<img src="figures/fig_pr_auc_vs_loss.png" style="width:86.0%" alt="Figure A2. PR-AUC versus packet loss (mean ± 95% interval over 5 seeds); top: full range, bottom: zoom on the learned models." /><figcaption aria-hidden="true"><strong>Figure A2.</strong> PR-AUC versus packet loss (mean ± 95% interval over 5 seeds); top: full range, bottom: zoom on the learned models.</figcaption>
-</figure>
-<figure>
-<img src="figures/fig_hypothesis_forest.png" style="width:88.0%" alt="Figure A3. Paired PR-AUC difference RA-SCM − reference with 95% intervals (blue: pre-specified H1 criterion met)." /><figcaption aria-hidden="true"><strong>Figure A3.</strong> Paired PR-AUC difference RA-SCM − reference with 95% intervals (blue: pre-specified H1 criterion met).</figcaption>
-</figure>
-<figure>
-<img src="figures/fig_ablation.png" style="width:70.0%" alt="Figure A4. Ablations: paired PR-AUC difference full RA-SCM − ablated variant." /><figcaption aria-hidden="true"><strong>Figure A4.</strong> Ablations: paired PR-AUC difference full RA-SCM − ablated variant.</figcaption>
-</figure>
-<figure>
-<img src="figures/fig_fpr_vs_loss.png" style="width:75.0%" alt="Figure A5. False-positive rate at the threshold frozen on validation data (dotted line: 5% target)." /><figcaption aria-hidden="true"><strong>Figure A5.</strong> False-positive rate at the threshold frozen on validation data (dotted line: 5% target).</figcaption>
-</figure>
-<figure>
-<img src="figures/fig_generalization.png" style="width:80.0%" alt="Figure A6. PR-AUC under changed swarm size, unseen trajectory and unseen formation (loss 30%)." /><figcaption aria-hidden="true"><strong>Figure A6.</strong> PR-AUC under changed swarm size, unseen trajectory and unseen formation (loss 30%).</figcaption>
-</figure>
-<figure>
-<img src="figures/fig_pr_curves.png" style="width:100.0%" alt="Figure A7. Precision–recall curves (seed 0) for four conditions." /><figcaption aria-hidden="true"><strong>Figure A7.</strong> Precision–recall curves (seed 0) for four conditions.</figcaption>
-</figure>
-<figure>
-<img src="figures/fig_delay.png" style="width:85.0%" alt="Figure A8. Median detection delay by anomaly type, without loss and with 30% loss (detected UAVs only)." /><figcaption aria-hidden="true"><strong>Figure A8.</strong> Median detection delay by anomaly type, without loss and with 30% loss (detected UAVs only).</figcaption>
-</figure>
-<figure>
-<img src="figures/fig_latency.png" style="width:80.0%" alt="Figure A9. Amortised CPU inference time and parameter counts." /><figcaption aria-hidden="true"><strong>Figure A9.</strong> Amortised CPU inference time and parameter counts.</figcaption>
-</figure>
+<p><em>Table B2. Parameters, amortised CPU inference time and training time. RA-SCM costs far more compute than GCN/GAT for a modest accuracy gain.</em></p>
 </body>
 </html>
